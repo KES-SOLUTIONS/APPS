@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="KES Rapports"/>
+<meta name="theme-color" content="#1A3A5C"/>
+<title>KES SOLUTIONS — Rapports</title>
+
+<!-- PWA Manifest inline -->
+<script>
+const manifestData = {
+  name: "KES SOLUTIONS — Rapports",
+  short_name: "KES Rapports",
+  start_url: "./",
+  display: "standalone",
+  background_color: "#F0F5FB",
+  theme_color: "#1A3A5C",
+  orientation: "portrait",
+  icons: [{
+    src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='40' fill='%231A3A5C'/%3E%3Ctext x='50%25' y='58%25' dominant-baseline='middle' text-anchor='middle' font-size='100' font-family='Arial'%3E🔧%3C/text%3E%3C/svg%3E",
+    sizes: "192x192", type: "image/svg+xml"
+  }]
+};
+const blob = new Blob([JSON.stringify(manifestData)], {type:'application/json'});
+const manifestURL = URL.createObjectURL(blob);
+document.addEventListener('DOMContentLoaded', () => {
+  const link = document.createElement('link');
+  link.rel = 'manifest'; link.href = manifestURL;
+  document.head.appendChild(link);
+});
+</script>
+
+<!-- jsPDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<style>
+:root {
+  --navy:  #1A3A5C;
+  --blue:  #1E5FA3;
+  --lblue: #D6E4F5;
+  --gold:  #C5973A;
+  --bg:    #F0F5FB;
+  --card:  #FFFFFF;
+  --text:  #1A2535;
+  --muted: #7A8FA6;
+  --border:#D0DFF0;
+  --green: #1A8A5C;
+  --r:     14px;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bot: env(safe-area-inset-bottom, 0px);
+}
+* { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+html, body { height:100%; overflow:hidden; background:var(--navy); }
+body {
+  font-family: -apple-system, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+  color: var(--text);
+  display: flex; flex-direction: column;
+}
+
+/* ── HEADER ────────────────────────────────── */
+.app-header {
+  background: var(--navy);
+  padding: calc(var(--safe-top) + 14px) 18px 14px;
+  border-bottom: 3px solid var(--gold);
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.header-left { display:flex; align-items:center; gap:12px; }
+.logo { width:40px; height:40px; border-radius:50%; background:var(--blue);
+        border:2px solid var(--gold); display:flex; align-items:center;
+        justify-content:center; font-size:18px; }
+.header-left h1 { color:#fff; font-size:17px; font-weight:700; }
+.header-left p  { color:#8BB8D8; font-size:10px; margin-top:1px; }
+.drive-btn {
+  background: rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.2);
+  border-radius:20px; padding:6px 12px; color:#fff; font-size:11px; font-weight:600;
+  cursor:pointer; display:flex; align-items:center; gap:5px;
+}
+.drive-btn.connected { background:rgba(26,138,92,.3); border-color:rgba(26,138,92,.5); }
+
+/* ── STEP BAR ──────────────────────────────── */
+.step-bar {
+  background: var(--navy); padding:10px 16px 12px;
+  display:flex; gap:6px; flex-shrink:0;
+}
+.step-item {
+  flex:1; display:flex; flex-direction:column; align-items:center;
+  gap:3px; cursor:pointer;
+}
+.step-dot {
+  width:28px; height:28px; border-radius:50%;
+  background:rgba(255,255,255,.1); border:2px solid rgba(255,255,255,.15);
+  display:flex; align-items:center; justify-content:center;
+  font-size:12px; color:rgba(255,255,255,.4); transition:.2s;
+}
+.step-item.active .step-dot { background:var(--blue); border-color:var(--blue); color:#fff; }
+.step-item.done   .step-dot { background:var(--gold);  border-color:var(--gold);  color:#fff; }
+.step-label { font-size:9px; color:rgba(255,255,255,.35); font-weight:500; }
+.step-item.active .step-label { color:rgba(255,255,255,.8); }
+.step-item.done   .step-label { color:var(--gold); }
+
+/* ── SCROLL AREA ───────────────────────────── */
+.scroll-area {
+  flex:1; overflow-y:auto; background:var(--bg);
+  -webkit-overflow-scrolling:touch;
+  padding:14px 14px calc(var(--safe-bot) + 90px);
+}
+
+/* ── CARD ──────────────────────────────────── */
+.card {
+  background:var(--card); border-radius:var(--r);
+  box-shadow:0 2px 16px rgba(26,58,92,.08);
+  padding:18px; margin-bottom:12px;
+  animation:slideUp .25s ease;
+}
+@keyframes slideUp {
+  from { opacity:0; transform:translateY(10px) }
+  to   { opacity:1; transform:none }
+}
+.card-title {
+  font-size:11px; font-weight:700; color:var(--blue);
+  text-transform:uppercase; letter-spacing:.8px;
+  margin-bottom:14px; display:flex; align-items:center; gap:8px;
+}
+.card-title::after { content:''; flex:1; height:1px; background:var(--border); }
+
+/* ── FORM ──────────────────────────────────── */
+.field { margin-bottom:12px; }
+label {
+  display:block; font-size:11px; font-weight:600; color:var(--muted);
+  text-transform:uppercase; letter-spacing:.4px; margin-bottom:5px;
+}
+input, select, textarea {
+  width:100%; padding:12px 14px;
+  border:1.5px solid var(--border); border-radius:10px;
+  font-family:inherit; font-size:15px; color:var(--text);
+  background:#FAFCFF; -webkit-appearance:none; appearance:none;
+  transition:border-color .15s;
+}
+input:focus, select:focus, textarea:focus {
+  outline:none; border-color:var(--blue);
+  box-shadow:0 0 0 3px rgba(30,95,163,.1);
+}
+textarea { min-height:80px; resize:vertical; line-height:1.5; }
+select { background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%237A8FA6' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+  background-repeat:no-repeat; background-position:right 14px center; padding-right:36px; }
+.row2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+
+/* ── PHOTOS ────────────────────────────────── */
+.photo-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+.photo-thumb {
+  aspect-ratio:1; border-radius:10px; overflow:hidden;
+  border:2px solid var(--border); position:relative; background:var(--bg);
+}
+.photo-thumb img { width:100%; height:100%; object-fit:cover; display:block; }
+.del-photo {
+  position:absolute; top:4px; right:4px;
+  background:rgba(192,57,43,.9); color:#fff; border:none;
+  border-radius:50%; width:22px; height:22px; font-size:13px;
+  cursor:pointer; display:flex; align-items:center; justify-content:center;
+  font-weight:700;
+}
+.add-photo-btn {
+  aspect-ratio:1; border-radius:10px;
+  border:2px dashed var(--blue); background:var(--lblue);
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  cursor:pointer; color:var(--blue); font-size:10px; font-weight:700; gap:4px;
+}
+.add-photo-btn .icon { font-size:26px; }
+#photoInput { display:none; }
+.photo-count { font-size:11px; color:var(--muted); margin-top:6px; text-align:right; }
+
+/* ── SIGNATURE ─────────────────────────────── */
+.sig-container {
+  border:2px solid var(--border); border-radius:12px;
+  background:#FAFCFF; position:relative; overflow:hidden;
+  margin-top:8px;
+}
+#sigCanvas { display:block; width:100%; height:180px; touch-action:none; cursor:crosshair; }
+.sig-placeholder {
+  position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  color:var(--border); font-size:13px; font-weight:500; pointer-events:none;
+  flex-direction:column; gap:4px;
+}
+.sig-placeholder .icon { font-size:28px; opacity:.5; }
+.sig-actions { display:flex; gap:8px; margin-top:8px; }
+.btn-clear {
+  flex:1; padding:10px; border-radius:10px;
+  border:1.5px solid var(--border); background:#fff;
+  color:var(--muted); font-family:inherit; font-size:13px; font-weight:600; cursor:pointer;
+}
+
+/* ── BOTTOM ACTIONS ────────────────────────── */
+.bottom-bar {
+  position:fixed; bottom:0; left:0; right:0;
+  padding:10px 14px calc(var(--safe-bot) + 10px);
+  background:rgba(240,245,251,.95);
+  backdrop-filter:blur(10px);
+  border-top:1px solid var(--border);
+  display:flex; gap:8px; z-index:50;
+}
+.btn {
+  flex:1; padding:14px; border-radius:12px; border:none;
+  font-family:inherit; font-size:14px; font-weight:700;
+  cursor:pointer; transition:.15s; display:flex; align-items:center;
+  justify-content:center; gap:6px; -webkit-appearance:none;
+}
+.btn:active { transform:scale(.97); }
+.btn-primary { background:var(--blue); color:#fff; }
+.btn-navy    { background:var(--navy); color:#fff; }
+.btn-green   { background:var(--green); color:#fff; }
+.btn-outline { background:#fff; border:2px solid var(--border); color:var(--muted); }
+
+/* ── PREVIEW ───────────────────────────────── */
+.preview-block {
+  background:var(--lblue); border-radius:12px;
+  padding:14px; border-left:4px solid var(--blue); margin-bottom:10px;
+}
+.preview-block h3 { font-size:13px; font-weight:700; color:var(--navy); margin-bottom:8px; }
+.prow { display:flex; justify-content:space-between; margin-bottom:4px; font-size:12px; }
+.prow .pl { color:var(--muted); }
+.prow .pv { font-weight:600; max-width:65%; text-align:right; word-break:break-word; }
+.preview-photos { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin-top:8px; }
+.preview-photos img {
+  width:100%; aspect-ratio:1; object-fit:cover; border-radius:8px;
+  border:1px solid var(--border);
+}
+.sig-preview { margin-top:8px; border-radius:8px; overflow:hidden; border:1px solid var(--border); }
+.sig-preview img { width:100%; display:block; max-height:80px; object-fit:contain; background:#fff; }
+
+/* ── TOAST ─────────────────────────────────── */
+.toast {
+  position:fixed; bottom:100px; left:50%; transform:translateX(-50%) translateY(20px);
+  background:var(--navy); color:#fff; padding:10px 22px; border-radius:50px;
+  font-size:13px; font-weight:600; box-shadow:0 6px 20px rgba(0,0,0,.2);
+  z-index:9999; opacity:0; transition:.25s; white-space:nowrap; pointer-events:none;
+}
+.toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+/* ── STATUS BADGE ──────────────────────────── */
+.badge {
+  display:inline-flex; align-items:center; gap:4px;
+  padding:3px 10px; border-radius:20px; font-size:11px; font-weight:600;
+}
+.badge-green { background:rgba(26,138,92,.12); color:var(--green); }
+.badge-gold  { background:rgba(197,151,58,.12); color:var(--gold); }
+
+/* ── RAPPORT NUM ───────────────────────────── */
+.rapport-num {
+  font-family: 'DM Mono', monospace;
+  background:var(--lblue); border-radius:8px; padding:8px 12px;
+  font-size:13px; font-weight:500; color:var(--blue);
+  display:flex; align-items:center; justify-content:space-between;
+  margin-bottom:14px;
+}
+
+/* ── DRIVE MODAL ───────────────────────────── */
+.overlay {
+  display:none; position:fixed; inset:0; background:rgba(0,0,0,.5);
+  z-index:200; align-items:flex-end; justify-content:center;
+}
+.overlay.show { display:flex; }
+.modal {
+  background:#fff; border-radius:24px 24px 0 0; padding:24px 20px;
+  width:100%; max-width:500px;
+  padding-bottom:calc(var(--safe-bot) + 24px);
+  animation:slideModal .25s ease;
+}
+@keyframes slideModal { from { transform:translateY(100%) } to { transform:none } }
+.modal h2 { font-size:18px; font-weight:700; color:var(--navy); margin-bottom:6px; }
+.modal p  { font-size:13px; color:var(--muted); margin-bottom:20px; line-height:1.5; }
+.modal-steps { display:flex; flex-direction:column; gap:10px; margin-bottom:20px; }
+.modal-step {
+  display:flex; align-items:flex-start; gap:12px;
+  background:var(--bg); padding:12px; border-radius:12px;
+}
+.modal-step .num {
+  width:24px; height:24px; border-radius:50%; background:var(--blue);
+  color:#fff; font-size:12px; font-weight:700;
+  display:flex; align-items:center; justify-content:center; flex-shrink:0;
+}
+.modal-step p { font-size:12px; margin:0; line-height:1.4; }
+.modal-step strong { color:var(--navy); }
+
+/* ── SECTIONS ──────────────────────────────── */
+.section { display:none; }
+.section.active { display:block; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="app-header">
+  <div class="header-left">
+    <div class="logo">🔧</div>
+    <div>
+      <h1>KES SOLUTIONS</h1>
+      <p>Rapport d'intervention</p>
+    </div>
+  </div>
+  <div class="drive-btn" id="driveBtn" onclick="showDriveModal()">
+    <span>☁️</span> <span id="driveBtnLabel">Drive</span>
+  </div>
+</div>
+
+<!-- STEP BAR -->
+<div class="step-bar">
+  <div class="step-item active" id="step-tab-1" onclick="goStep(1)">
+    <div class="step-dot">1</div>
+    <div class="step-label">Infos</div>
+  </div>
+  <div class="step-item" id="step-tab-2" onclick="goStep(2)">
+    <div class="step-dot">2</div>
+    <div class="step-label">Travaux</div>
+  </div>
+  <div class="step-item" id="step-tab-3" onclick="goStep(3)">
+    <div class="step-dot">📷</div>
+    <div class="step-label">Photos</div>
+  </div>
+  <div class="step-item" id="step-tab-4" onclick="goStep(4)">
+    <div class="step-dot">✍️</div>
+    <div class="step-label">Signature</div>
+  </div>
+  <div class="step-item" id="step-tab-5" onclick="goStep(5)">
+    <div class="step-dot">✅</div>
+    <div class="step-label">Envoyer</div>
+  </div>
+</div>
+
+<!-- SCROLL -->
+<div class="scroll-area">
+
+  <!-- ══ STEP 1 : INFORMATIONS ══ -->
+  <div class="section active" id="sec1">
+    <div class="card">
+      <div class="rapport-num">
+        <span>N° Rapport</span>
+        <span id="rapportNum">KES-2026-001</span>
+      </div>
+
+      <div class="card-title">👤 Client</div>
+      <div class="field">
+        <label>Nom du client / Société</label>
+        <input type="text" id="clientNom" placeholder="Ex : Syndic du Parc Saint-Cloud" autocomplete="off"/>
+      </div>
+      <div class="field">
+        <label>Adresse d'intervention</label>
+        <input type="text" id="adresse" placeholder="15 rue des Lilas, 93100 Montreuil" autocomplete="off"/>
+      </div>
+      <div class="row2">
+        <div class="field">
+          <label>Contact sur place</label>
+          <input type="text" id="contact" placeholder="M. Dupont" autocomplete="off"/>
+        </div>
+        <div class="field">
+          <label>Téléphone</label>
+          <input type="tel" id="telClient" placeholder="06 XX XX XX XX"/>
+        </div>
+      </div>
+
+      <div class="card-title" style="margin-top:4px">📅 Intervention</div>
+      <div class="row2">
+        <div class="field">
+          <label>Date</label>
+          <input type="date" id="dateIntervention"/>
+        </div>
+        <div class="field">
+          <label>Heure</label>
+          <input type="time" id="heureIntervention"/>
+        </div>
+      </div>
+      <div class="field">
+        <label>Technicien</label>
+        <input type="text" id="techNom" placeholder="Votre nom" autocomplete="off"/>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ STEP 2 : TRAVAUX ══ -->
+  <div class="section" id="sec2">
+    <div class="card">
+      <div class="card-title">⚙️ Nature de l'intervention</div>
+      <div class="field">
+        <label>Type de prestation</label>
+        <select id="typePrestation">
+          <option value="">— Sélectionner —</option>
+          <optgroup label="Chauffage">
+            <option>Diagnostic + réparation chaudière (journée)</option>
+            <option>Diagnostic + réparation chaudière (nuit/WE)</option>
+            <option>Entretien annuel chaudière gaz</option>
+            <option>Entretien annuel chaudière fioul</option>
+            <option>Entretien chauffe-eau gaz</option>
+            <option>Entretien chaudière électrique</option>
+            <option>Dépannage chaufferie / SST</option>
+            <option>Installation chaudière</option>
+          </optgroup>
+          <optgroup label="Plomberie">
+            <option>Petite plomberie avec fourniture</option>
+            <option>Recherche de fuite</option>
+            <option>Réparation réseau / radiateur</option>
+          </optgroup>
+          <optgroup label="Ventilation">
+            <option>Maintenance VMC</option>
+            <option>Dépannage VMC</option>
+          </optgroup>
+          <option>Autre (voir rapport)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Description des travaux effectués</label>
+        <textarea id="descTravaux" placeholder="Décrire précisément les travaux réalisés, pièces remplacées, observations..."></textarea>
+      </div>
+      <div class="field">
+        <label>Statut de l'intervention</label>
+        <select id="statut">
+          <option value="Terminée">✅ Terminée</option>
+          <option value="Partielle">⚠️ Partielle — suite nécessaire</option>
+          <option value="Devis requis">📋 Devis requis</option>
+          <option value="Urgence">🔴 Urgence — retour planifié</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Observations / Recommandations</label>
+        <textarea id="observations" placeholder="Recommandations, pièces à commander, prochaine maintenance..." style="min-height:60px"></textarea>
+      </div>
+      <div class="row2">
+        <div class="field">
+          <label>Durée (heures)</label>
+          <input type="number" id="duree" placeholder="2.5" step="0.5" min="0.5"/>
+        </div>
+        <div class="field">
+          <label>Montant HT (€)</label>
+          <input type="number" id="montant" placeholder="175" step="1"/>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ STEP 3 : PHOTOS ══ -->
+  <div class="section" id="sec3">
+    <div class="card">
+      <div class="card-title">📷 Photos de l'intervention</div>
+      <p style="font-size:12px; color:var(--muted); margin-bottom:12px;">Jusqu'à 5 photos — avant / pendant / après</p>
+      <div class="photo-grid" id="photoGrid">
+        <div class="add-photo-btn" onclick="document.getElementById('photoInput').click()">
+          <span class="icon">📷</span>
+          <span>Ajouter</span>
+        </div>
+      </div>
+      <div class="photo-count" id="photoCount">0 / 5 photos</div>
+      <input type="file" id="photoInput" accept="image/*" capture="environment" multiple/>
+    </div>
+  </div>
+
+  <!-- ══ STEP 4 : SIGNATURE ══ -->
+  <div class="section" id="sec4">
+    <div class="card">
+      <div class="card-title">✍️ Signature client</div>
+      <p style="font-size:12px; color:var(--muted); margin-bottom:10px;">
+        Le client signe pour valider la réception des travaux
+      </p>
+      <div class="sig-container">
+        <canvas id="sigCanvas" width="600" height="200"></canvas>
+        <div class="sig-placeholder" id="sigPlaceholder">
+          <span class="icon">✍️</span>
+          <span>Signer ici</span>
+        </div>
+      </div>
+      <div class="sig-actions">
+        <button class="btn-clear" onclick="clearSig()">🗑 Effacer</button>
+      </div>
+      <div class="field" style="margin-top:14px">
+        <label>Nom du signataire</label>
+        <input type="text" id="sigNom" placeholder="Nom et prénom du client / représentant"/>
+      </div>
+      <div class="field">
+        <label>Qualité du signataire</label>
+        <input type="text" id="sigQualite" placeholder="Ex : Gestionnaire de copropriété"/>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ STEP 5 : RÉCAP & ENVOI ══ -->
+  <div class="section" id="sec5">
+    <div class="card">
+      <div class="card-title">📋 Récapitulatif</div>
+
+      <div class="preview-block">
+        <h3>📍 Client & Lieu</h3>
+        <div class="prow"><span class="pl">Client</span><span class="pv" id="prev-client">—</span></div>
+        <div class="prow"><span class="pl">Adresse</span><span class="pv" id="prev-adresse">—</span></div>
+        <div class="prow"><span class="pl">Contact</span><span class="pv" id="prev-contact">—</span></div>
+        <div class="prow"><span class="pl">Date</span><span class="pv" id="prev-date">—</span></div>
+        <div class="prow"><span class="pl">Technicien</span><span class="pv" id="prev-tech">—</span></div>
+      </div>
+
+      <div class="preview-block">
+        <h3>⚙️ Travaux</h3>
+        <div class="prow"><span class="pl">Prestation</span><span class="pv" id="prev-presta">—</span></div>
+        <div class="prow"><span class="pl">Statut</span><span class="pv" id="prev-statut">—</span></div>
+        <div class="prow"><span class="pl">Durée</span><span class="pv" id="prev-duree">—</span></div>
+        <div class="prow"><span class="pl">Montant HT</span><span class="pv" id="prev-montant">—</span></div>
+      </div>
+
+      <div class="preview-block" id="prev-photos-block" style="display:none">
+        <h3>📷 Photos</h3>
+        <div class="preview-photos" id="prev-photos"></div>
+      </div>
+
+      <div class="preview-block" id="prev-sig-block" style="display:none">
+        <h3>✍️ Signature</h3>
+        <div class="prow"><span class="pl">Signataire</span><span class="pv" id="prev-signom">—</span></div>
+        <div class="sig-preview"><img id="prev-sig-img" src="" alt="signature"/></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📤 Générer & Envoyer</div>
+
+      <div id="drive-status-msg" style="margin-bottom:12px; font-size:12px; color:var(--muted); background:var(--bg); border-radius:10px; padding:10px 12px; line-height:1.5;">
+        ☁️ Connectez Google Drive (bouton en haut) pour sauvegarder automatiquement.<br>
+        Sinon, le PDF sera téléchargé sur votre iPhone.
+      </div>
+
+      <button class="btn btn-navy" onclick="generatePDF(false)" style="margin-bottom:8px">
+        📥 Télécharger le PDF
+      </button>
+      <button class="btn btn-green" onclick="generatePDF(true)" id="btnDrive">
+        ☁️ Sauvegarder sur Google Drive
+      </button>
+    </div>
+  </div>
+
+</div><!-- end scroll -->
+
+<!-- BOTTOM BAR -->
+<div class="bottom-bar">
+  <button class="btn btn-outline" id="btnBack" onclick="prevStep()" style="display:none">‹ Retour</button>
+  <button class="btn btn-primary" id="btnNext" onclick="nextStep()">Suivant ›</button>
+</div>
+
+<!-- DRIVE MODAL -->
+<div class="overlay" id="driveOverlay" onclick="hideDriveModal(event)">
+  <div class="modal">
+    <h2>☁️ Google Drive</h2>
+    <p>Les rapports PDF seront sauvegardés dans votre Google Drive, dans le dossier <strong>KES SOLUTIONS / Rapports</strong>.</p>
+    <div class="modal-steps">
+      <div class="modal-step">
+        <div class="num">1</div>
+        <p>Cliquez sur <strong>Connecter Google Drive</strong> ci-dessous — une fenêtre Google s'ouvre.</p>
+      </div>
+      <div class="modal-step">
+        <div class="num">2</div>
+        <p>Connectez-vous avec votre compte Google et autorisez l'accès.</p>
+      </div>
+      <div class="modal-step">
+        <div class="num">3</div>
+        <p>Le rapport PDF sera automatiquement envoyé sur Drive après génération.</p>
+      </div>
+    </div>
+
+    <div style="margin-bottom:10px">
+      <label style="font-size:11px; font-weight:600; color:var(--muted); display:block; margin-bottom:6px; text-transform:uppercase; letter-spacing:.4px">
+        Token d'accès Google Drive API
+      </label>
+      <input type="text" id="driveToken" placeholder="Coller votre access_token ici" style="font-size:13px"/>
+      <p style="font-size:10px; color:var(--muted); margin-top:4px">
+        Obtenez un token sur <strong>developers.google.com/oauthplayground</strong> — scope : drive.file
+      </p>
+    </div>
+
+    <button class="btn btn-primary" onclick="connectDrive()" style="margin-bottom:8px">
+      Connecter Google Drive
+    </button>
+    <button class="btn btn-outline" onclick="hideDriveModal()">Annuler</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ── STATE ─────────────────────────────────────────────────────
+let currentStep = 1;
+const TOTAL_STEPS = 5;
+let photos = [];       // { dataUrl, name }
+let sigHasData = false;
+let driveToken = null;
+let rapportNum = generateNum();
+
+// ── INIT ──────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  // Default date/time
+  const now = new Date();
+  document.getElementById('dateIntervention').value = now.toISOString().split('T')[0];
+  document.getElementById('heureIntervention').value =
+    now.toTimeString().slice(0,5);
+  document.getElementById('rapportNum').textContent = rapportNum;
+
+  initSignature();
+  initPhotos();
+});
+
+function generateNum() {
+  const d = new Date();
+  const yy = d.getFullYear();
+  const mm = String(d.getMonth()+1).padStart(2,'0');
+  const dd = String(d.getDate()).padStart(2,'0');
+  const rand = String(Math.floor(Math.random()*900)+100);
+  return `KES-${yy}${mm}${dd}-${rand}`;
+}
+
+// ── STEPS ─────────────────────────────────────────────────────
+function goStep(n) {
+  if(n > currentStep) { nextStep(); return; }
+  if(n < currentStep) { currentStep = n; renderStep(); }
+}
+
+function nextStep() {
+  if(!validateStep(currentStep)) return;
+  if(currentStep < TOTAL_STEPS) {
+    currentStep++;
+    renderStep();
+    if(currentStep === TOTAL_STEPS) buildPreview();
+  }
+}
+
+function prevStep() {
+  if(currentStep > 1) { currentStep--; renderStep(); }
+}
+
+function renderStep() {
+  document.querySelectorAll('.section').forEach((s,i) => {
+    s.classList.toggle('active', i+1 === currentStep);
+  });
+  document.querySelectorAll('.step-item').forEach((s,i) => {
+    s.classList.remove('active','done');
+    if(i+1 === currentStep) s.classList.add('active');
+    if(i+1 < currentStep)   s.classList.add('done');
+  });
+  document.getElementById('btnBack').style.display = currentStep > 1 ? 'flex' : 'none';
+  document.getElementById('btnNext').style.display = currentStep < TOTAL_STEPS ? 'flex' : 'none';
+
+  // Scroll to top
+  document.querySelector('.scroll-area').scrollTop = 0;
+}
+
+function validateStep(s) {
+  if(s === 1) {
+    if(!v('clientNom')) return toast('⚠️ Nom du client requis'), false;
+    if(!v('adresse'))   return toast('⚠️ Adresse requise'), false;
+    if(!v('techNom'))   return toast('⚠️ Nom du technicien requis'), false;
+  }
+  if(s === 2) {
+    if(!v('typePrestation')) return toast('⚠️ Type de prestation requis'), false;
+    if(!v('descTravaux'))    return toast('⚠️ Description requise'), false;
+  }
+  return true;
+}
+
+function v(id) { return document.getElementById(id).value.trim(); }
+
+// ── PHOTOS ───────────────────────────────────────────────────
+function initPhotos() {
+  document.getElementById('photoInput').addEventListener('change', e => {
+    const files = Array.from(e.target.files);
+    files.forEach(file => {
+      if(photos.length >= 5) return;
+      const reader = new FileReader();
+      reader.onload = ev => {
+        photos.push({ dataUrl: ev.target.result, name: file.name });
+        renderPhotos();
+      };
+      reader.readAsDataURL(file);
+    });
+    e.target.value = '';
+  });
+}
+
+function renderPhotos() {
+  const grid = document.getElementById('photoGrid');
+  grid.innerHTML = '';
+  photos.forEach((p,i) => {
+    const div = document.createElement('div');
+    div.className = 'photo-thumb';
+    div.innerHTML = `<img src="${p.dataUrl}" loading="lazy"/>
+      <button class="del-photo" onclick="delPhoto(${i})">×</button>`;
+    grid.appendChild(div);
+  });
+  if(photos.length < 5) {
+    const add = document.createElement('div');
+    add.className = 'add-photo-btn';
+    add.innerHTML = `<span class="icon">📷</span><span>Ajouter</span>`;
+    add.onclick = () => document.getElementById('photoInput').click();
+    grid.appendChild(add);
+  }
+  document.getElementById('photoCount').textContent = `${photos.length} / 5 photos`;
+}
+
+function delPhoto(i) {
+  photos.splice(i,1);
+  renderPhotos();
+}
+
+// ── SIGNATURE ────────────────────────────────────────────────
+function initSignature() {
+  const canvas = document.getElementById('sigCanvas');
+  const ctx = canvas.getContext('2d');
+  ctx.strokeStyle = '#1A2535';
+  ctx.lineWidth = 2.5;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  let drawing = false, lastX = 0, lastY = 0;
+
+  function getPos(e) {
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    if(e.touches) {
+      return {
+        x: (e.touches[0].clientX - rect.left) * scaleX,
+        y: (e.touches[0].clientY - rect.top)  * scaleY
+      };
+    }
+    return {
+      x: (e.clientX - rect.left) * scaleX,
+      y: (e.clientY - rect.top)  * scaleY
+    };
+  }
+
+  function start(e) {
+    e.preventDefault();
+    drawing = true;
+    const p = getPos(e);
+    lastX = p.x; lastY = p.y;
+    document.getElementById('sigPlaceholder').style.display = 'none';
+  }
+  function draw(e) {
+    if(!drawing) return;
+    e.preventDefault();
+    const p = getPos(e);
+    ctx.beginPath();
+    ctx.moveTo(lastX, lastY);
+    ctx.lineTo(p.x, p.y);
+    ctx.stroke();
+    lastX = p.x; lastY = p.y;
+    sigHasData = true;
+  }
+  function stop(e) { drawing = false; }
+
+  canvas.addEventListener('mousedown', start);
+  canvas.addEventListener('mousemove', draw);
+  canvas.addEventListener('mouseup', stop);
+  canvas.addEventListener('touchstart', start, { passive:false });
+  canvas.addEventListener('touchmove', draw,  { passive:false });
+  canvas.addEventListener('touchend', stop);
+}
+
+function clearSig() {
+  const canvas = document.getElementById('sigCanvas');
+  canvas.getContext('2d').clearRect(0,0,canvas.width,canvas.height);
+  sigHasData = false;
+  document.getElementById('sigPlaceholder').style.display = 'flex';
+}
+
+// ── PREVIEW ──────────────────────────────────────────────────
+function buildPreview() {
+  const fmt = (id) => v(id) || '—';
+
+  // Date formatting
+  let dateStr = '—';
+  const d = v('dateIntervention');
+  const h = v('heureIntervention');
+  if(d) {
+    const parts = d.split('-');
+    dateStr = `${parts[2]}/${parts[1]}/${parts[0]}`;
+    if(h) dateStr += ` à ${h}`;
+  }
+
+  document.getElementById('prev-client').textContent = fmt('clientNom');
+  document.getElementById('prev-adresse').textContent = fmt('adresse');
+  document.getElementById('prev-contact').textContent =
+    [fmt('contact'), v('telClient')].filter(x=>x!=='—').join(' — ') || '—';
+  document.getElementById('prev-date').textContent = dateStr;
+  document.getElementById('prev-tech').textContent = fmt('techNom');
+  document.getElementById('prev-presta').textContent = fmt('typePrestation');
+  document.getElementById('prev-statut').textContent = fmt('statut');
+  document.getElementById('prev-duree').textContent =
+    v('duree') ? `${v('duree')} h` : '—';
+  document.getElementById('prev-montant').textContent =
+    v('montant') ? `${v('montant')} € HT` : '—';
+
+  // Photos
+  const pb = document.getElementById('prev-photos-block');
+  const pg = document.getElementById('prev-photos');
+  if(photos.length) {
+    pb.style.display = 'block';
+    pg.innerHTML = photos.map(p => `<img src="${p.dataUrl}" loading="lazy"/>`).join('');
+  } else pb.style.display = 'none';
+
+  // Signature
+  const sb = document.getElementById('prev-sig-block');
+  if(sigHasData) {
+    sb.style.display = 'block';
+    document.getElementById('prev-signom').textContent =
+      [fmt('sigNom'), v('sigQualite')].filter(x=>x!=='—').join(' — ') || '—';
+    document.getElementById('prev-sig-img').src =
+      document.getElementById('sigCanvas').toDataURL('image/png');
+  } else sb.style.display = 'none';
+}
+
+// ── PDF GENERATION ────────────────────────────────────────────
+async function generatePDF(toDrive) {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation:'portrait', unit:'mm', format:'a4' });
+
+  const W = 210, ML = 14, MR = 14, CW = W - ML - MR;
+  const NAVY = [26,58,92], BLUE = [30,95,163], GOLD = [197,151,58],
+        LBLUE = [214,228,245], MUTED = [122,143,166], WHITE = [255,255,255],
+        DARK = [26,37,53], BG = [240,245,251];
+
+  let y = 0;
+
+  // ── HEADER ──
+  doc.setFillColor(...NAVY);
+  doc.rect(0, 0, W, 36, 'F');
+  doc.setFillColor(...GOLD);
+  doc.rect(0, 33, W, 1.5, 'F');
+
+  doc.setTextColor(...WHITE);
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(20);
+  doc.text('KES SOLUTIONS', W/2, 14, { align:'center' });
+
+  doc.setFont('helvetica','normal');
+  doc.setFontSize(9);
+  doc.setTextColor(139,184,216);
+  doc.text('Maintenance Thermique & Hydraulique · Île-de-France', W/2, 21, { align:'center' });
+
+  doc.setTextColor(...WHITE);
+  doc.setFontSize(8);
+  doc.text(`Rapport d'intervention  N° ${rapportNum}`, W/2, 29, { align:'center' });
+  y = 42;
+
+  // ── DATE / TECHNICIEN ──
+  const dateFmt = (() => {
+    const d = v('dateIntervention');
+    const h = v('heureIntervention');
+    if(!d) return '—';
+    const p = d.split('-');
+    return `${p[2]}/${p[1]}/${p[0]}${h ? ' à '+h : ''}`;
+  })();
+
+  function infoLine(label, val, yy) {
+    doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(...MUTED);
+    doc.text(label, ML, yy);
+    doc.setFont('helvetica','normal'); doc.setTextColor(...DARK);
+    doc.text(val || '—', ML + 32, yy);
+  }
+
+  doc.setFillColor(...BG);
+  doc.roundedRect(ML, y, CW, 20, 3, 3, 'F');
+  infoLine('Date :', dateFmt, y+6);
+  infoLine('Technicien :', v('techNom') || '—', y+12);
+  infoLine('Statut :', v('statut') || '—', y+18);
+  y += 25;
+
+  // ── CLIENT ──
+  function sectionHeader(title, yy) {
+    doc.setFillColor(...LBLUE);
+    doc.rect(ML, yy, CW, 7, 'F');
+    doc.setFillColor(...BLUE);
+    doc.rect(ML, yy, 3, 7, 'F');
+    doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(...NAVY);
+    doc.text(title, ML+6, yy+5);
+    return yy + 11;
+  }
+
+  y = sectionHeader('CLIENT & LIEU D\'INTERVENTION', y);
+  doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(...DARK);
+  doc.text(v('clientNom') || '—', ML, y); y += 6;
+  doc.setFontSize(9); doc.setTextColor(...MUTED);
+  doc.text(v('adresse') || '—', ML, y); y += 5;
+  const contactLine = [v('contact'), v('telClient')].filter(Boolean).join('  ·  ');
+  if(contactLine) { doc.text(contactLine, ML, y); y += 5; }
+  y += 3;
+
+  // ── TRAVAUX ──
+  y = sectionHeader('NATURE DE L\'INTERVENTION', y);
+  doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(...DARK);
+  doc.text(v('typePrestation') || '—', ML, y); y += 6;
+
+  doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(...DARK);
+  const desc = v('descTravaux') || '—';
+  const descLines = doc.splitTextToSize(desc, CW);
+  doc.text(descLines, ML, y);
+  y += descLines.length * 5 + 2;
+
+  if(v('observations')) {
+    doc.setFont('helvetica','bolditalic'); doc.setFontSize(8); doc.setTextColor(...MUTED);
+    doc.text('Observations :', ML, y); y += 5;
+    doc.setFont('helvetica','italic');
+    const obsLines = doc.splitTextToSize(v('observations'), CW);
+    doc.text(obsLines, ML, y);
+    y += obsLines.length * 5 + 2;
+  }
+  y += 2;
+
+  // ── TARIF ──
+  if(v('montant') || v('duree')) {
+    y = sectionHeader('TARIFICATION', y);
+    const cols = [ML, ML+60, ML+100, ML+140];
+    const headers = ['Prestation', 'Durée', 'Montant HT', 'TVA'];
+    doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(...BLUE);
+    headers.forEach((h,i) => doc.text(h, cols[i], y)); y += 2;
+    doc.setFillColor(...LBLUE); doc.rect(ML, y, CW, 0.5, 'F'); y += 4;
+    doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(...DARK);
+    const vals = [
+      v('typePrestation') ? v('typePrestation').substring(0,25)+'…' : '—',
+      v('duree') ? v('duree')+' h' : '—',
+      v('montant') ? v('montant')+' € HT' : '—',
+      '10% (art. 279-0 bis)\nou Autoliquidation'
+    ];
+    vals.forEach((val,i) => { const lines = doc.splitTextToSize(val,50); doc.text(lines, cols[i], y); });
+    y += 14;
+
+    // TVA note
+    doc.setFillColor(...BG); doc.roundedRect(ML, y, CW, 12, 2, 2, 'F');
+    doc.setFont('helvetica','bold'); doc.setFontSize(7); doc.setTextColor(...NAVY);
+    doc.text('Régime TVA applicable :', ML+3, y+4);
+    doc.setFont('helvetica','normal'); doc.setTextColor(...MUTED);
+    doc.text('TVA 10% (logements +2 ans, art. 279-0 bis CGI)  |  Autoliquidation si sous-traitance (art. 283-2 nonies CGI)', ML+3, y+9);
+    y += 17;
+  }
+
+  // ── PHOTOS ──
+  if(photos.length > 0) {
+    if(y > 200) { doc.addPage(); y = 20; }
+    y = sectionHeader(`PHOTOS DE L'INTERVENTION (${photos.length})`, y);
+
+    const cols = 3;
+    const pw = (CW - (cols-1)*4) / cols;
+    const ph = pw * 0.75;
+
+    for(let i = 0; i < photos.length; i++) {
+      const col = i % cols;
+      const row = Math.floor(i / cols);
+      const px = ML + col * (pw+4);
+      const py = y + row * (ph+4);
+
+      if(py + ph > 270) { doc.addPage(); y = 20; }
+
+      try {
+        doc.addImage(photos[i].dataUrl, 'JPEG', px, py + (row>0?0:0), pw, ph);
+        doc.setDrawColor(...LBLUE); doc.rect(px, py, pw, ph, 'S');
+      } catch(e) {
+        doc.setFillColor(...BG); doc.rect(px, py, pw, ph, 'F');
+        doc.setTextColor(...MUTED); doc.setFontSize(7);
+        doc.text('Photo', px + pw/2, py + ph/2, { align:'center' });
+      }
+    }
+    const rows = Math.ceil(photos.length / cols);
+    y += rows * (ph + 4) + 4;
+  }
+
+  // ── SIGNATURE ──
+  if(sigHasData) {
+    if(y > 220) { doc.addPage(); y = 20; }
+    y = sectionHeader('VALIDATION CLIENT', y);
+
+    const sigData = document.getElementById('sigCanvas').toDataURL('image/png');
+    const sigW = 70, sigH = 25;
+    doc.setFillColor(...BG); doc.roundedRect(ML, y, sigW+4, sigH+8, 2, 2, 'F');
+    doc.addImage(sigData, 'PNG', ML+2, y+2, sigW, sigH);
+    doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(...DARK);
+    if(v('sigNom'))     doc.text(v('sigNom'),     ML+sigW+10, y+10);
+    if(v('sigQualite')) doc.text(v('sigQualite'), ML+sigW+10, y+16);
+    if(dateFmt)         doc.text(`Signé le ${dateFmt}`, ML+sigW+10, y+22);
+    y += sigH + 16;
+  }
+
+  // ── FOOTER ──
+  const pages = doc.internal.getNumberOfPages();
+  for(let i=1; i<=pages; i++) {
+    doc.setPage(i);
+    doc.setFillColor(...NAVY);
+    doc.rect(0, 287, W, 10, 'F');
+    doc.setFillColor(...GOLD);
+    doc.rect(0, 286.5, W, 0.8, 'F');
+    doc.setFont('helvetica','normal'); doc.setFontSize(7); doc.setTextColor(...WHITE);
+    doc.text('KES SOLUTIONS · systeme@kopijots.fr · 06 60 35 52 68 · Île-de-France', W/2, 293, { align:'center' });
+    doc.text(`Page ${i}/${pages}`, W-ML, 293, { align:'right' });
+  }
+
+  const pdfBlob = doc.output('blob');
+  const fileName = `Rapport_${rapportNum}_${(v('clientNom')||'client').replace(/\s+/g,'-')}.pdf`;
+
+  if(toDrive && driveToken) {
+    await uploadToDrive(pdfBlob, fileName);
+  } else if(toDrive && !driveToken) {
+    toast('⚠️ Connectez d\'abord Google Drive');
+    showDriveModal();
+    return;
+  } else {
+    // Download
+    const url = URL.createObjectURL(pdfBlob);
+    const a = document.createElement('a');
+    a.href = url; a.download = fileName; a.click();
+    URL.revokeObjectURL(url);
+    toast('✅ PDF téléchargé !');
+  }
+}
+
+// ── GOOGLE DRIVE UPLOAD ───────────────────────────────────────
+async function uploadToDrive(blob, fileName) {
+  toast('⏳ Envoi vers Drive...');
+  try {
+    // Get or create folder
+    let folderId = await getDriveFolder();
+
+    const meta = JSON.stringify({ name: fileName, parents: [folderId] });
+    const form = new FormData();
+    form.append('metadata', new Blob([meta], { type:'application/json' }));
+    form.append('file', blob, fileName);
+
+    const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${driveToken}` },
+      body: form
+    });
+
+    if(res.ok) {
+      const data = await res.json();
+      toast('✅ Rapport sauvegardé sur Drive !');
+    } else {
+      throw new Error('Upload failed');
+    }
+  } catch(e) {
+    toast('❌ Erreur Drive — PDF téléchargé en local');
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = fileName; a.click();
+    URL.revokeObjectURL(url);
+  }
+}
+
+async function getDriveFolder() {
+  // Search for existing KES SOLUTIONS folder
+  const q = encodeURIComponent("mimeType='application/vnd.google-apps.folder' and name='KES SOLUTIONS - Rapports' and trashed=false");
+  const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,name)`, {
+    headers: { Authorization: `Bearer ${driveToken}` }
+  });
+  const data = await res.json();
+  if(data.files && data.files.length > 0) return data.files[0].id;
+
+  // Create folder
+  const create = await fetch('https://www.googleapis.com/drive/v3/files', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${driveToken}`, 'Content-Type':'application/json' },
+    body: JSON.stringify({ name:'KES SOLUTIONS - Rapports', mimeType:'application/vnd.google-apps.folder' })
+  });
+  const folder = await create.json();
+  return folder.id;
+}
+
+// ── DRIVE MODAL ───────────────────────────────────────────────
+function showDriveModal() {
+  document.getElementById('driveOverlay').classList.add('show');
+}
+function hideDriveModal(e) {
+  if(!e || e.target === document.getElementById('driveOverlay'))
+    document.getElementById('driveOverlay').classList.remove('show');
+}
+function connectDrive() {
+  const token = document.getElementById('driveToken').value.trim();
+  if(!token) {
+    toast('⚠️ Collez votre access token Google');
+    return;
+  }
+  driveToken = token;
+  document.getElementById('driveBtn').classList.add('connected');
+  document.getElementById('driveBtnLabel').textContent = '✅ Drive';
+  document.getElementById('drive-status-msg').innerHTML =
+    '✅ <strong>Google Drive connecté</strong> — Les rapports seront sauvegardés dans le dossier <em>KES SOLUTIONS - Rapports</em>.';
+  hideDriveModal();
+  toast('✅ Drive connecté !');
+}
+
+// ── TOAST ─────────────────────────────────────────────────────
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// ── SERVICE WORKER (PWA offline) ──────────────────────────────
+if('serviceWorker' in navigator) {
+  const swCode = `
+    const CACHE = 'kes-v1';
+    self.addEventListener('install', e => {
+      e.waitUntil(caches.open(CACHE).then(c => c.addAll(['/'])));
+    });
+    self.addEventListener('fetch', e => {
+      e.respondWith(caches.match(e.request).then(r => r || fetch(e.request)));
+    });
+  `;
+  const swBlob = new Blob([swCode], { type:'application/javascript' });
+  const swURL = URL.createObjectURL(swBlob);
+  navigator.serviceWorker.register(swURL).catch(()=>{});
+}
+</script>
+</body>
+</html>
