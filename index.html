@@ -1,0 +1,1337 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des Bons d'Intervention</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, #1e3a5f 0%, #2d5a7b 100%);
+            min-height: 100vh;
+            padding: 30px;
+            font-size: 18px; /* Police de base 18px comme demandé */
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 24px;
+            box-shadow: 0 24px 80px rgba(0, 0, 0, 0.4);
+            overflow: hidden;
+        }
+
+        /* Navigation principale */
+        .main-tabs {
+            display: flex;
+            background: #f8fafc;
+            border-bottom: 4px solid #e2e8f0;
+            padding: 0 30px;
+        }
+
+        .main-tab {
+            padding: 24px 40px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 1.15em;
+            font-weight: 700;
+            color: #64748b;
+            border-bottom: 4px solid transparent;
+            margin-bottom: -4px;
+            transition: all 0.3s ease;
+            letter-spacing: 0.3px;
+        }
+
+        .main-tab:hover {
+            color: #1e3a5f;
+            background: rgba(30, 58, 95, 0.05);
+        }
+
+        .main-tab.active {
+            color: #1e3a5f;
+            border-bottom-color: #1e3a5f;
+            background: #ffffff;
+        }
+
+        .tab-panel {
+            display: none;
+            padding: 50px;
+        }
+
+        .tab-panel.active {
+            display: block;
+        }
+
+        /* En-tête de section */
+        .section-header {
+            text-align: center;
+            margin-bottom: 50px;
+            padding-bottom: 30px;
+            border-bottom: 4px solid #1e3a5f;
+        }
+
+        .section-header h1 {
+            color: #1e293b;
+            font-size: 2.5em;
+            margin-bottom: 15px;
+            font-weight: 800;
+        }
+
+        .section-header p {
+            color: #64748b;
+            font-size: 1.2em;
+            font-weight: 500;
+        }
+
+        /* Formulaires */
+        .form-section {
+            background: #f8fafc;
+            padding: 35px;
+            border-radius: 16px;
+            margin-bottom: 35px;
+            border: 2px solid #e2e8f0;
+        }
+
+        .form-section-title {
+            font-size: 1.4em;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .form-group {
+            margin-bottom: 30px;
+        }
+
+        label {
+            display: block;
+            color: #000000; /* Noir intense comme demandé */
+            font-weight: 700;
+            margin-bottom: 12px;
+            font-size: 1.05em;
+            letter-spacing: 0.2px;
+        }
+
+        input[type="text"],
+        input[type="date"],
+        input[type="time"],
+        input[type="file"],
+        textarea {
+            width: 100%;
+            padding: 18px 20px;
+            border: 3px solid #cbd5e0;
+            border-radius: 12px;
+            font-size: 1.05em;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            color: #000000;
+            background: #ffffff;
+            font-weight: 500;
+        }
+
+        input:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #1e3a5f;
+            box-shadow: 0 0 0 4px rgba(30, 58, 95, 0.15);
+            transform: translateY(-1px);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 140px;
+            color: #000000; /* Noir intense pour les observations */
+            line-height: 1.7;
+        }
+
+        textarea::placeholder {
+            color: #94a3b8;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+
+        /* Interventions */
+        .interventions-container {
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 16px;
+            border: 3px solid #e2e8f0;
+        }
+
+        .intervention-card {
+            background: #f8fafc;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border: 2px solid #e2e8f0;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .intervention-card:hover {
+            border-color: #cbd5e0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .intervention-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .intervention-number {
+            font-size: 1.25em;
+            font-weight: 800;
+            color: #1e3a5f;
+        }
+
+        /* Boutons */
+        .btn {
+            padding: 18px 36px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.05em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            letter-spacing: 0.3px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #1e3a5f 0%, #2d5a7b 100%);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #f1f5f9;
+            color: #334155;
+        }
+
+        .btn-block {
+            width: 100%;
+            margin-top: 15px;
+        }
+
+        .btn-add {
+            background: linear-gradient(135deg, #0891b2 0%, #06b6d4 100%);
+            color: white;
+        }
+
+        /* Signature */
+        .signature-container {
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 16px;
+            border: 3px solid #e2e8f0;
+        }
+
+        .signature-canvas {
+            width: 100%;
+            height: 250px;
+            border: 3px solid #cbd5e0;
+            border-radius: 12px;
+            cursor: crosshair;
+            background: #ffffff;
+            touch-action: none;
+        }
+
+        .signature-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        /* Messages */
+        .alert {
+            padding: 20px 25px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            font-weight: 600;
+            font-size: 1.05em;
+            display: none;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .alert.show {
+            display: flex;
+        }
+
+        .alert-success {
+            background: #d1fae5;
+            border: 3px solid #10b981;
+            color: #065f46;
+        }
+
+        .alert-info {
+            background: #dbeafe;
+            border: 3px solid #3b82f6;
+            color: #1e40af;
+        }
+
+        /* Historique */
+        .history-grid {
+            display: grid;
+            gap: 20px;
+        }
+
+        .history-card {
+            background: #f8fafc;
+            padding: 30px;
+            border-radius: 16px;
+            border: 3px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .history-card:hover {
+            border-color: #1e3a5f;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+            transform: translateY(-2px);
+        }
+
+        .history-info h3 {
+            font-size: 1.3em;
+            color: #1e293b;
+            margin-bottom: 10px;
+            font-weight: 800;
+        }
+
+        .history-info p {
+            color: #64748b;
+            font-size: 1em;
+            margin: 5px 0;
+            font-weight: 500;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 80px 40px;
+            color: #94a3b8;
+            font-size: 1.2em;
+        }
+
+        .empty-state-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        /* Logo preview */
+        .logo-preview {
+            margin-top: 20px;
+            padding: 25px;
+            background: #f8fafc;
+            border-radius: 12px;
+            border: 3px dashed #cbd5e0;
+            text-align: center;
+        }
+
+        .logo-preview img {
+            max-width: 250px;
+            max-height: 150px;
+            object-fit: contain;
+        }
+
+        .logo-preview.empty {
+            color: #94a3b8;
+            font-style: italic;
+        }
+
+        /* Bouton nouveau bon */
+        .new-bon-btn {
+            display: none;
+        }
+
+        .new-bon-btn.visible {
+            display: block;
+        }
+
+        /* Profil sauvegardé indicator */
+        .profile-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 20px;
+            background: #d1fae5;
+            border: 2px solid #10b981;
+            border-radius: 8px;
+            color: #065f46;
+            font-weight: 700;
+            margin-bottom: 25px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            body {
+                padding: 15px;
+                font-size: 16px;
+            }
+
+            .tab-panel {
+                padding: 25px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .main-tabs {
+                overflow-x: auto;
+                padding: 0 15px;
+            }
+
+            .main-tab {
+                padding: 18px 24px;
+                font-size: 1em;
+                white-space: nowrap;
+            }
+
+            .section-header h1 {
+                font-size: 2em;
+            }
+
+            .signature-actions {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .tab-panel.active {
+            animation: fadeIn 0.4s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Navigation principale -->
+        <nav class="main-tabs">
+            <button class="main-tab active" onclick="switchMainTab('profile')">⚙️ Profil Entreprise</button>
+            <button class="main-tab" onclick="switchMainTab('new-bon')">📋 Nouveau Bon</button>
+            <button class="main-tab" onclick="switchMainTab('history')">📂 Historique</button>
+        </nav>
+
+        <!-- ONGLET PROFIL ENTREPRISE -->
+        <div id="profileTab" class="tab-panel active">
+            <div class="section-header">
+                <h1>Configuration du Profil</h1>
+                <p>Enregistrez les informations de votre entreprise une seule fois</p>
+            </div>
+
+            <div id="profileSavedAlert" class="profile-status" style="display: none;">
+                <span>✓</span>
+                <span>Profil enregistré avec succès</span>
+            </div>
+
+            <form id="profileForm" class="form-section">
+                <div class="form-section-title">🏢 Informations de l'entreprise</div>
+
+                <div class="form-group">
+                    <label for="companyName">Nom de la Société *</label>
+                    <input type="text" id="companyName" placeholder="Ex: Kopilots SARL" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="siret">SIRET</label>
+                        <input type="text" id="siret" placeholder="123 456 789 00012">
+                    </div>
+                    <div class="form-group">
+                        <label for="siren">SIREN</label>
+                        <input type="text" id="siren" placeholder="123 456 789">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="technicianName">Nom du Technicien *</label>
+                    <input type="text" id="technicianName" placeholder="Ex: Jean Dupont" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="companyLogo">Logo de l'entreprise</label>
+                    <input type="file" id="companyLogo" accept="image/*" onchange="previewLogo(event)">
+                    <div id="logoPreview" class="logo-preview empty">
+                        Aucun logo sélectionné
+                    </div>
+                </div>
+
+                <button type="button" class="btn btn-success btn-block" onclick="saveProfile()">
+                    💾 Enregistrer le Profil
+                </button>
+            </form>
+        </div>
+
+        <!-- ONGLET NOUVEAU BON -->
+        <div id="newBonTab" class="tab-panel">
+            <div class="section-header">
+                <h1>Nouveau Bon d'Intervention</h1>
+                <p id="companyNameDisplay">Configurez d'abord votre profil entreprise</p>
+            </div>
+
+            <div id="successAlert" class="alert alert-success">
+                <span>✅</span>
+                <span>PDF généré avec succès !</span>
+            </div>
+
+            <form id="interventionForm">
+                <!-- Informations Client -->
+                <div class="form-section">
+                    <div class="form-section-title">👤 Informations Client</div>
+
+                    <div class="form-group">
+                        <label for="clientName">Nom du Client *</label>
+                        <input type="text" id="clientName" placeholder="Nom complet du client" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="clientAddress">Adresse Complète *</label>
+                        <input type="text" id="clientAddress" placeholder="Numéro, rue, ville, code postal" required>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="arrivalDate">📅 Date d'Arrivée *</label>
+                            <input type="date" id="arrivalDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="arrivalTime">🕐 Heure d'Arrivée *</label>
+                            <input type="time" id="arrivalTime" required>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Interventions -->
+                <div class="form-section">
+                    <div class="form-section-title">🔧 Interventions Réalisées</div>
+                    <div class="interventions-container">
+                        <div id="interventionsList"></div>
+                        <button type="button" class="btn btn-add btn-block" onclick="addIntervention()">
+                            ➕ Ajouter une Intervention
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Observations -->
+                <div class="form-section">
+                    <div class="form-section-title">📝 Observations</div>
+                    <div class="form-group">
+                        <textarea id="observations" placeholder="Notes complémentaires, recommandations, points d'attention..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Signature -->
+                <div class="form-section">
+                    <div class="form-section-title">✍️ Signature du Client</div>
+                    <div class="signature-container">
+                        <div style="margin-bottom: 20px;">
+                            <label style="margin-bottom: 15px;">Mode de signature :</label>
+                            <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px;">
+                                <button type="button" class="btn btn-secondary" onclick="setSignatureMode('draw')" id="btnDraw" style="flex: 1; min-width: 150px;">
+                                    ✍️ Signer à la main
+                                </button>
+                                <button type="button" class="btn btn-secondary" onclick="setSignatureMode('paraph')" id="btnParaph" style="flex: 1; min-width: 150px;">
+                                    📝 Parapher
+                                </button>
+                                <button type="button" class="btn btn-secondary" onclick="setSignatureMode('type')" id="btnType" style="flex: 1; min-width: 150px;">
+                                    ⌨️ Écrire le nom
+                                </button>
+                                <button type="button" class="btn btn-secondary" onclick="setSignatureMode('none')" id="btnNone" style="flex: 1; min-width: 150px;">
+                                    ☐ Pas de signature
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div id="drawSignatureArea" style="display: none;">
+                            <canvas id="signatureCanvas" class="signature-canvas" width="800" height="250"></canvas>
+                        </div>
+                        
+                        <div id="typeSignatureArea" style="display: none;">
+                            <input type="text" id="signatureName" placeholder="Entrez le nom complet..." style="width: 100%; font-size: 1.3em; padding: 20px; text-align: center; font-family: 'Brush Script MT', cursive;">
+                        </div>
+                        
+                        <div id="noSignatureArea" style="display: none; padding: 30px; background: #f8fafc; border-radius: 12px; text-align: center; border: 3px dashed #cbd5e0;">
+                            <p style="color: #64748b; font-size: 1.1em;">✓ Bon sans signature validé</p>
+                        </div>
+                        
+                        <div class="signature-actions">
+                            <button type="button" class="btn btn-secondary" onclick="clearSignature()" style="flex: 1;">
+                                🗑️ Effacer
+                            </button>
+                            <button type="button" class="btn btn-primary" onclick="generatePDF()" style="flex: 2;">
+                                📄 Télécharger le PDF
+                            </button>
+                        </div>
+                        <button type="button" class="btn btn-success btn-block new-bon-btn" id="newBonBtn" onclick="createNewBon()">
+                            ✨ Créer un Nouveau Bon
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- ONGLET HISTORIQUE -->
+        <div id="historyTab" class="tab-panel">
+            <div class="section-header">
+                <h1>Historique des Bons</h1>
+                <p>Retrouvez et téléchargez tous vos bons d'intervention</p>
+            </div>
+
+            <div id="historyList" class="history-grid"></div>
+            <div id="emptyHistory" class="empty-state">
+                <div class="empty-state-icon">📭</div>
+                <div>Aucun bon d'intervention enregistré</div>
+                <p style="font-size: 0.9em; margin-top: 10px;">Créez votre premier bon pour le voir apparaître ici</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variables globales
+        let interventionCount = 0;
+        let signatureCanvas, signatureCtx;
+        let isDrawing = false;
+        let hasSignature = false;
+        let companyProfile = null;
+        let history = [];
+        let signatureMode = null;
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function() {
+            loadProfile();
+            loadHistory();
+            initSignatureCanvas();
+            addIntervention();
+            setTodayDate();
+        });
+
+        function setTodayDate() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('arrivalDate').value = today;
+        }
+
+        // Gestion du profil
+        function loadProfile() {
+            const saved = localStorage.getItem('company_profile');
+            if (saved) {
+                companyProfile = JSON.parse(saved);
+                document.getElementById('companyName').value = companyProfile.companyName || '';
+                document.getElementById('siret').value = companyProfile.siret || '';
+                document.getElementById('siren').value = companyProfile.siren || '';
+                document.getElementById('technicianName').value = companyProfile.technicianName || '';
+                
+                if (companyProfile.logo) {
+                    const preview = document.getElementById('logoPreview');
+                    preview.innerHTML = `<img src="${companyProfile.logo}" alt="Logo">`;
+                    preview.classList.remove('empty');
+                }
+                
+                document.getElementById('profileSavedAlert').style.display = 'flex';
+                updateCompanyDisplay();
+            }
+        }
+
+        function saveProfile() {
+            const companyName = document.getElementById('companyName').value;
+            const technicianName = document.getElementById('technicianName').value;
+
+            if (!companyName || !technicianName) {
+                alert('⚠️ Le nom de la société et du technicien sont obligatoires');
+                return;
+            }
+
+            companyProfile = {
+                companyName: companyName,
+                siret: document.getElementById('siret').value,
+                siren: document.getElementById('siren').value,
+                technicianName: technicianName,
+                logo: document.getElementById('logoPreview').querySelector('img')?.src || null
+            };
+
+            localStorage.setItem('company_profile', JSON.stringify(companyProfile));
+            document.getElementById('profileSavedAlert').style.display = 'flex';
+            updateCompanyDisplay();
+            
+            // Animation de confirmation
+            const btn = event.target;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '✓ Profil Sauvegardé !';
+            btn.style.background = 'linear-gradient(135deg, #059669 0%, #10b981 100%)';
+            setTimeout(() => {
+                btn.innerHTML = originalText;
+                btn.style.background = '';
+            }, 2000);
+        }
+
+        function previewLogo(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById('logoPreview');
+                    preview.innerHTML = `<img src="${e.target.result}" alt="Logo">`;
+                    preview.classList.remove('empty');
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function updateCompanyDisplay() {
+            if (companyProfile) {
+                document.getElementById('companyNameDisplay').textContent = companyProfile.companyName;
+            }
+        }
+
+        // Navigation
+        function switchMainTab(tabName) {
+            document.querySelectorAll('.main-tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            
+            if (tabName === 'profile') {
+                document.getElementById('profileTab').classList.add('active');
+            } else if (tabName === 'new-bon') {
+                document.getElementById('newBonTab').classList.add('active');
+            } else if (tabName === 'history') {
+                document.getElementById('historyTab').classList.add('active');
+                renderHistory();
+            }
+        }
+
+        // Gestion de la signature
+        function setSignatureMode(mode) {
+            signatureMode = mode;
+            hasSignature = false;
+            
+            // Reset tous les boutons
+            document.querySelectorAll('#btnDraw, #btnParaph, #btnType, #btnNone').forEach(btn => {
+                btn.style.background = '';
+                btn.style.color = '';
+            });
+            
+            // Cacher toutes les zones
+            document.getElementById('drawSignatureArea').style.display = 'none';
+            document.getElementById('typeSignatureArea').style.display = 'none';
+            document.getElementById('noSignatureArea').style.display = 'none';
+            
+            // Afficher la zone appropriée
+            if (mode === 'draw' || mode === 'paraph') {
+                document.getElementById('drawSignatureArea').style.display = 'block';
+                document.getElementById('btn' + (mode === 'draw' ? 'Draw' : 'Paraph')).style.background = 'linear-gradient(135deg, #1e3a5f 0%, #2d5a7b 100%)';
+                document.getElementById('btn' + (mode === 'draw' ? 'Draw' : 'Paraph')).style.color = 'white';
+                initSignatureCanvas();
+                if (mode === 'paraph') {
+                    signatureCtx.font = '48px "Brush Script MT", cursive';
+                }
+            } else if (mode === 'type') {
+                document.getElementById('typeSignatureArea').style.display = 'block';
+                document.getElementById('btnType').style.background = 'linear-gradient(135deg, #1e3a5f 0%, #2d5a7b 100%)';
+                document.getElementById('btnType').style.color = 'white';
+                document.getElementById('signatureName').value = '';
+                document.getElementById('signatureName').addEventListener('input', function() {
+                    hasSignature = this.value.trim().length > 0;
+                });
+            } else if (mode === 'none') {
+                document.getElementById('noSignatureArea').style.display = 'block';
+                document.getElementById('btnNone').style.background = 'linear-gradient(135deg, #1e3a5f 0%, #2d5a7b 100%)';
+                document.getElementById('btnNone').style.color = 'white';
+                hasSignature = true;
+            }
+        }
+        
+        function initSignatureCanvas() {
+            signatureCanvas = document.getElementById('signatureCanvas');
+            if (!signatureCanvas) return;
+            
+            signatureCtx = signatureCanvas.getContext('2d');
+            
+            // Nettoyer le canvas
+            signatureCtx.clearRect(0, 0, signatureCanvas.width, signatureCanvas.height);
+            
+            // Retirer les anciens listeners
+            const newCanvas = signatureCanvas.cloneNode(true);
+            signatureCanvas.parentNode.replaceChild(newCanvas, signatureCanvas);
+            signatureCanvas = newCanvas;
+            signatureCtx = signatureCanvas.getContext('2d');
+
+            // Events souris
+            signatureCanvas.addEventListener('mousedown', startDrawing);
+            signatureCanvas.addEventListener('mousemove', draw);
+            signatureCanvas.addEventListener('mouseup', stopDrawing);
+            signatureCanvas.addEventListener('mouseout', stopDrawing);
+
+            // Events tactiles
+            signatureCanvas.addEventListener('touchstart', handleTouch);
+            signatureCanvas.addEventListener('touchmove', handleTouch);
+            signatureCanvas.addEventListener('touchend', stopDrawing);
+        }
+
+        function startDrawing(e) {
+            isDrawing = true;
+            hasSignature = true;
+            const rect = signatureCanvas.getBoundingClientRect();
+            signatureCtx.beginPath();
+            signatureCtx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+        }
+
+        function draw(e) {
+            if (!isDrawing) return;
+            const rect = signatureCanvas.getBoundingClientRect();
+            signatureCtx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+            signatureCtx.strokeStyle = '#000000';
+            signatureCtx.lineWidth = 3;
+            signatureCtx.lineCap = 'round';
+            signatureCtx.lineJoin = 'round';
+            signatureCtx.stroke();
+        }
+
+        function stopDrawing() {
+            isDrawing = false;
+        }
+
+        function handleTouch(e) {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const mouseEvent = new MouseEvent(
+                e.type === 'touchstart' ? 'mousedown' : e.type === 'touchmove' ? 'mousemove' : 'mouseup',
+                { clientX: touch.clientX, clientY: touch.clientY }
+            );
+            signatureCanvas.dispatchEvent(mouseEvent);
+        }
+
+        function clearSignature() {
+            if (signatureMode === 'draw' || signatureMode === 'paraph') {
+                if (signatureCtx && signatureCanvas) {
+                    signatureCtx.clearRect(0, 0, signatureCanvas.width, signatureCanvas.height);
+                }
+            } else if (signatureMode === 'type') {
+                document.getElementById('signatureName').value = '';
+            }
+            hasSignature = false;
+            if (signatureMode === 'none') {
+                hasSignature = true;
+            }
+        }
+
+        // Gestion des interventions
+        function addIntervention() {
+            interventionCount++;
+            const container = document.getElementById('interventionsList');
+            const card = document.createElement('div');
+            card.className = 'intervention-card';
+            card.id = `intervention-${interventionCount}`;
+            
+            card.innerHTML = `
+                <div class="intervention-header">
+                    <div class="intervention-number">Intervention #${interventionCount}</div>
+                    ${interventionCount > 1 ? `<button type="button" class="btn btn-danger" onclick="removeIntervention(${interventionCount})" style="padding: 10px 20px;">❌ Supprimer</button>` : ''}
+                </div>
+                <div class="form-group">
+                    <label>Description de l'intervention *</label>
+                    <textarea class="intervention-desc" placeholder="Décrivez en détail l'intervention réalisée..." required></textarea>
+                </div>
+            `;
+            
+            container.appendChild(card);
+        }
+
+        function removeIntervention(id) {
+            const card = document.getElementById(`intervention-${id}`);
+            if (card) {
+                card.style.animation = 'fadeOut 0.3s ease';
+                setTimeout(() => card.remove(), 300);
+            }
+        }
+
+        // Nouveau bon
+        function createNewBon() {
+            if (confirm('Êtes-vous sûr de vouloir créer un nouveau bon ? Les données actuelles non enregistrées seront perdues.')) {
+                document.getElementById('interventionForm').reset();
+                clearSignature();
+                
+                document.getElementById('interventionsList').innerHTML = '';
+                interventionCount = 0;
+                addIntervention();
+                
+                document.getElementById('newBonBtn').classList.remove('visible');
+                document.getElementById('successAlert').classList.remove('show');
+                
+                // Réinitialiser le mode de signature
+                signatureMode = null;
+                document.getElementById('drawSignatureArea').style.display = 'none';
+                document.getElementById('typeSignatureArea').style.display = 'none';
+                document.getElementById('noSignatureArea').style.display = 'none';
+                document.querySelectorAll('#btnDraw, #btnParaph, #btnType, #btnNone').forEach(btn => {
+                    btn.style.background = '';
+                    btn.style.color = '';
+                });
+                
+                setTodayDate();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        // Génération PDF
+        function generatePDF() {
+            // Vérifications
+            if (!companyProfile) {
+                alert('⚠️ Veuillez d\'abord configurer votre profil entreprise dans l\'onglet "Profil"');
+                switchMainTab('profile');
+                document.querySelector('.main-tab').click();
+                return;
+            }
+
+            if (!hasSignature || !signatureMode) {
+                alert('⚠️ Veuillez choisir un mode de signature');
+                return;
+            }
+
+            const clientName = document.getElementById('clientName').value;
+            const clientAddress = document.getElementById('clientAddress').value;
+            const arrivalDate = document.getElementById('arrivalDate').value;
+            const arrivalTime = document.getElementById('arrivalTime').value;
+
+            if (!clientName || !clientAddress || !arrivalDate || !arrivalTime) {
+                alert('⚠️ Veuillez remplir tous les champs obligatoires');
+                return;
+            }
+
+            // Récupérer les interventions
+            const interventions = [];
+            document.querySelectorAll('.intervention-desc').forEach(textarea => {
+                if (textarea.value.trim()) {
+                    interventions.push(textarea.value.trim());
+                }
+            });
+
+            if (interventions.length === 0) {
+                alert('⚠️ Veuillez ajouter au moins une intervention');
+                return;
+            }
+
+            const observations = document.getElementById('observations').value;
+            
+            // Récupérer la signature selon le mode
+            let signatureData = null;
+            if (signatureMode === 'draw' || signatureMode === 'paraph') {
+                signatureData = signatureCanvas.toDataURL('image/png');
+            } else if (signatureMode === 'type') {
+                const name = document.getElementById('signatureName').value;
+                if (!name.trim()) {
+                    alert('⚠️ Veuillez entrer le nom pour la signature');
+                    return;
+                }
+                // Créer une image de signature typée
+                const tempCanvas = document.createElement('canvas');
+                tempCanvas.width = 400;
+                tempCanvas.height = 100;
+                const tempCtx = tempCanvas.getContext('2d');
+                tempCtx.fillStyle = '#000000';
+                tempCtx.font = '36px "Brush Script MT", cursive';
+                tempCtx.textAlign = 'center';
+                tempCtx.textBaseline = 'middle';
+                tempCtx.fillText(name, 200, 50);
+                signatureData = tempCanvas.toDataURL('image/png');
+            } else if (signatureMode === 'none') {
+                // Créer une image "Bon sans signature"
+                const tempCanvas = document.createElement('canvas');
+                tempCanvas.width = 400;
+                tempCanvas.height = 100;
+                const tempCtx = tempCanvas.getContext('2d');
+                tempCtx.fillStyle = '#64748b';
+                tempCtx.font = 'bold 20px Arial';
+                tempCtx.textAlign = 'center';
+                tempCtx.textBaseline = 'middle';
+                tempCtx.fillText('✓ Bon sans signature', 200, 50);
+                signatureData = tempCanvas.toDataURL('image/png');
+            }
+
+            // Générer le PDF
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            let yPos = 20;
+
+            // Logo
+            if (companyProfile.logo) {
+                try {
+                    doc.addImage(companyProfile.logo, 'PNG', 15, yPos, 45, 45);
+                } catch (e) {
+                    console.log('Erreur logo:', e);
+                }
+            }
+
+            // En-tête entreprise
+            doc.setFontSize(16);
+            doc.setFont(undefined, 'bold');
+            doc.text(companyProfile.companyName, 70, yPos + 10);
+            
+            doc.setFontSize(10);
+            doc.setFont(undefined, 'normal');
+            if (companyProfile.siret) doc.text(`SIRET: ${companyProfile.siret}`, 70, yPos + 18);
+            if (companyProfile.siren) doc.text(`SIREN: ${companyProfile.siren}`, 70, yPos + 24);
+            doc.text(`Technicien: ${companyProfile.technicianName}`, 70, yPos + 30);
+
+            // Titre
+            yPos = 75;
+            doc.setFillColor(30, 58, 95);
+            doc.rect(0, yPos, 210, 20, 'F');
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(20);
+            doc.setFont(undefined, 'bold');
+            doc.text('BON D\'INTERVENTION', 105, yPos + 13, { align: 'center' });
+
+            // Informations client
+            yPos = 105;
+            doc.setTextColor(0, 0, 0);
+            doc.setFontSize(12);
+            
+            doc.setFont(undefined, 'bold');
+            doc.text('CLIENT:', 20, yPos);
+            doc.setFont(undefined, 'normal');
+            doc.text(clientName, 50, yPos);
+
+            yPos += 8;
+            doc.setFont(undefined, 'bold');
+            doc.text('ADRESSE:', 20, yPos);
+            doc.setFont(undefined, 'normal');
+            const addressLines = doc.splitTextToSize(clientAddress, 150);
+            doc.text(addressLines, 50, yPos);
+            yPos += (addressLines.length * 6);
+
+            yPos += 5;
+            doc.setFont(undefined, 'bold');
+            doc.text('DATE:', 20, yPos);
+            doc.setFont(undefined, 'normal');
+            const dateObj = new Date(arrivalDate);
+            doc.text(dateObj.toLocaleDateString('fr-FR'), 50, yPos);
+
+            doc.setFont(undefined, 'bold');
+            doc.text('HEURE:', 110, yPos);
+            doc.setFont(undefined, 'normal');
+            doc.text(arrivalTime, 140, yPos);
+
+            // Interventions
+            yPos += 15;
+            doc.setFont(undefined, 'bold');
+            doc.setFontSize(14);
+            doc.text('INTERVENTIONS RÉALISÉES:', 20, yPos);
+
+            yPos += 8;
+            doc.setFontSize(11);
+            doc.setFont(undefined, 'normal');
+
+            interventions.forEach((intervention, index) => {
+                const text = `${index + 1}. ${intervention}`;
+                const lines = doc.splitTextToSize(text, 170);
+                
+                if (yPos + (lines.length * 6) > 250) {
+                    doc.addPage();
+                    yPos = 20;
+                }
+                
+                doc.text(lines, 20, yPos);
+                yPos += (lines.length * 6) + 5;
+            });
+
+            // Observations
+            if (observations) {
+                yPos += 5;
+                
+                if (yPos > 240) {
+                    doc.addPage();
+                    yPos = 20;
+                }
+                
+                doc.setFont(undefined, 'bold');
+                doc.setFontSize(12);
+                doc.text('OBSERVATIONS:', 20, yPos);
+                
+                yPos += 8;
+                doc.setFont(undefined, 'normal');
+                doc.setFontSize(11);
+                const obsLines = doc.splitTextToSize(observations, 170);
+                doc.text(obsLines, 20, yPos);
+                yPos += (obsLines.length * 6);
+            }
+
+            // Signature
+            yPos += 15;
+            if (yPos > 220) {
+                doc.addPage();
+                yPos = 20;
+            }
+
+            doc.setFont(undefined, 'bold');
+            doc.setFontSize(12);
+            doc.text('SIGNATURE DU CLIENT:', 20, yPos);
+            
+            yPos += 5;
+            doc.addImage(signatureData, 'PNG', 20, yPos, 90, 36);
+            
+            yPos += 40;
+            doc.setFont(undefined, 'normal');
+            doc.setFontSize(9);
+            doc.setTextColor(100, 100, 100);
+            doc.text(`Date du bon: ${dateObj.toLocaleDateString('fr-FR')}`, 20, yPos);
+
+            // Sauvegarder dans l'historique
+            const bonData = {
+                clientName,
+                clientAddress,
+                arrivalDate: dateObj.toLocaleDateString('fr-FR'),
+                arrivalTime,
+                interventions,
+                observations,
+                signatureData,
+                createdAt: new Date().toISOString(),
+                companyProfile: { ...companyProfile }
+            };
+
+            history.unshift(bonData);
+            if (history.length > 100) {
+                history = history.slice(0, 100);
+            }
+            saveHistory();
+
+            // Télécharger
+            const filename = `Bon_Intervention_${clientName.replace(/\s+/g, '_')}_${dateObj.toISOString().split('T')[0]}.pdf`;
+            doc.save(filename);
+
+            // Afficher le succès
+            document.getElementById('successAlert').classList.add('show');
+            document.getElementById('newBonBtn').classList.add('visible');
+
+            setTimeout(() => {
+                document.getElementById('successAlert').classList.remove('show');
+            }, 5000);
+        }
+
+        // Historique
+        function loadHistory() {
+            const saved = localStorage.getItem('bons_history');
+            if (saved) {
+                history = JSON.parse(saved);
+            }
+        }
+
+        function saveHistory() {
+            localStorage.setItem('bons_history', JSON.stringify(history));
+        }
+
+        function renderHistory() {
+            const container = document.getElementById('historyList');
+            const emptyState = document.getElementById('emptyHistory');
+
+            if (history.length === 0) {
+                container.style.display = 'none';
+                emptyState.style.display = 'block';
+                return;
+            }
+
+            container.style.display = 'grid';
+            emptyState.style.display = 'none';
+
+            container.innerHTML = history.map((bon, index) => `
+                <div class="history-card">
+                    <div class="history-info">
+                        <h3>${bon.clientName}</h3>
+                        <p>📍 ${bon.clientAddress}</p>
+                        <p>📅 ${bon.arrivalDate} • 🕐 ${bon.arrivalTime}</p>
+                        <p style="color: #94a3b8; font-size: 0.9em;">Créé le ${new Date(bon.createdAt).toLocaleDateString('fr-FR')}</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="redownloadBon(${index})">
+                        📥 Télécharger
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function redownloadBon(index) {
+            const bon = history[index];
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            let yPos = 20;
+
+            // Logo
+            if (bon.companyProfile.logo) {
+                try {
+                    doc.addImage(bon.companyProfile.logo, 'PNG', 15, yPos, 45, 45);
+                } catch (e) {}
+            }
+
+            // En-tête
+            doc.setFontSize(16);
+            doc.setFont(undefined, 'bold');
+            doc.text(bon.companyProfile.companyName, 70, yPos + 10);
+            
+            doc.setFontSize(10);
+            doc.setFont(undefined, 'normal');
+            if (bon.companyProfile.siret) doc.text(`SIRET: ${bon.companyProfile.siret}`, 70, yPos + 18);
+            if (bon.companyProfile.siren) doc.text(`SIREN: ${bon.companyProfile.siren}`, 70, yPos + 24);
+            doc.text(`Technicien: ${bon.companyProfile.technicianName}`, 70, yPos + 30);
+
+            // Titre
+            yPos = 75;
+            doc.setFillColor(30, 58, 95);
+            doc.rect(0, yPos, 210, 20, 'F');
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(20);
+            doc.setFont(undefined, 'bold');
+            doc.text('BON D\'INTERVENTION', 105, yPos + 13, { align: 'center' });
+
+            // Client
+            yPos = 105;
+            doc.setTextColor(0, 0, 0);
+            doc.setFontSize(12);
+            
+            doc.setFont(undefined, 'bold');
+            doc.text('CLIENT:', 20, yPos);
+            doc.setFont(undefined, 'normal');
+            doc.text(bon.clientName, 50, yPos);
+
+            yPos += 8;
+            doc.setFont(undefined, 'bold');
+            doc.text('ADRESSE:', 20, yPos);
+            doc.setFont(undefined, 'normal');
+            const addressLines = doc.splitTextToSize(bon.clientAddress, 150);
+            doc.text(addressLines, 50, yPos);
+            yPos += (addressLines.length * 6);
+
+            yPos += 5;
+            doc.setFont(undefined, 'bold');
+            doc.text('DATE:', 20, yPos);
+            doc.setFont(undefined, 'normal');
+            doc.text(bon.arrivalDate, 50, yPos);
+
+            doc.setFont(undefined, 'bold');
+            doc.text('HEURE:', 110, yPos);
+            doc.setFont(undefined, 'normal');
+            doc.text(bon.arrivalTime, 140, yPos);
+
+            // Interventions
+            yPos += 15;
+            doc.setFont(undefined, 'bold');
+            doc.setFontSize(14);
+            doc.text('INTERVENTIONS RÉALISÉES:', 20, yPos);
+
+            yPos += 8;
+            doc.setFontSize(11);
+            doc.setFont(undefined, 'normal');
+
+            bon.interventions.forEach((intervention, i) => {
+                const text = `${i + 1}. ${intervention}`;
+                const lines = doc.splitTextToSize(text, 170);
+                
+                if (yPos + (lines.length * 6) > 250) {
+                    doc.addPage();
+                    yPos = 20;
+                }
+                
+                doc.text(lines, 20, yPos);
+                yPos += (lines.length * 6) + 5;
+            });
+
+            // Observations
+            if (bon.observations) {
+                yPos += 5;
+                
+                if (yPos > 240) {
+                    doc.addPage();
+                    yPos = 20;
+                }
+                
+                doc.setFont(undefined, 'bold');
+                doc.setFontSize(12);
+                doc.text('OBSERVATIONS:', 20, yPos);
+                
+                yPos += 8;
+                doc.setFont(undefined, 'normal');
+                doc.setFontSize(11);
+                const obsLines = doc.splitTextToSize(bon.observations, 170);
+                doc.text(obsLines, 20, yPos);
+                yPos += (obsLines.length * 6);
+            }
+
+            // Signature
+            yPos += 15;
+            if (yPos > 220) {
+                doc.addPage();
+                yPos = 20;
+            }
+
+            doc.setFont(undefined, 'bold');
+            doc.setFontSize(12);
+            doc.text('SIGNATURE DU CLIENT:', 20, yPos);
+            
+            yPos += 5;
+            doc.addImage(bon.signatureData, 'PNG', 20, yPos, 90, 36);
+            
+            yPos += 40;
+            doc.setFont(undefined, 'normal');
+            doc.setFontSize(9);
+            doc.setTextColor(100, 100, 100);
+            doc.text(`Date du bon: ${bon.arrivalDate}`, 20, yPos);
+
+            const filename = `Bon_Intervention_${bon.clientName.replace(/\s+/g, '_')}_${bon.arrivalDate.replace(/\//g, '-')}.pdf`;
+            doc.save(filename);
+        }
+    </script>
+</body>
+</html>
