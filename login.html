@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>KES Solutions — Connexion</title>
+  <style>
+    :root{
+      --bg1:#1a1a2e; --bg2:#16213e;
+      --card:rgba(255,255,255,.06);
+      --border:rgba(255,255,255,.10);
+      --text:#fff; --muted:#9ca3af;
+      --blue:#0099ff; --green:#10b981; --red:#ef4444;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+      min-height:100vh;
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+      color:var(--text);
+      background:linear-gradient(135deg,var(--bg1) 0%,var(--bg2) 100%);
+      display:flex; align-items:center; justify-content:center;
+      padding:20px;
+    }
+    .wrap{width:100%;max-width:520px}
+    .header{text-align:center;margin-bottom:18px}
+    .header h1{font-size:2rem;letter-spacing:.5px;color:var(--blue);font-weight:800}
+    .header p{margin-top:6px;color:var(--muted);font-size:.9rem}
+    .card{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:18px;
+      padding:18px;
+      backdrop-filter: blur(12px);
+    }
+    .tabs{display:flex;gap:10px;margin-bottom:14px}
+    .tab{
+      flex:1;
+      border:none;
+      cursor:pointer;
+      padding:12px 10px;
+      border-radius:12px;
+      font-weight:800;
+      background:#374151;
+      color:#d1d5db;
+      transition:.2s;
+    }
+    .tab.active{background:var(--blue);color:#fff}
+    .section{display:none}
+    .section.active{display:block}
+    label{display:block;margin:12px 0 6px;color:var(--muted);font-weight:700;font-size:.85rem}
+    input{
+      width:100%;
+      padding:12px 14px;
+      border-radius:12px;
+      border:1px solid #374151;
+      background:rgba(31,41,55,.85);
+      color:#fff;
+      outline:none;
+    }
+    input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,153,255,.12)}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    @media(max-width:520px){.row{grid-template-columns:1fr}}
+    .btn{
+      margin-top:14px;
+      width:100%;
+      border:none;
+      cursor:pointer;
+      padding:14px 14px;
+      border-radius:12px;
+      font-weight:900;
+      font-size:1rem;
+      display:inline-flex;align-items:center;justify-content:center;
+      gap:10px;
+      transition:.2s;
+    }
+    .btn.primary{background:var(--blue);color:#fff;box-shadow:0 4px 24px rgba(0,153,255,.35)}
+    .btn.primary:hover{filter:brightness(.95)}
+    .btn.success{background:var(--green);color:#fff}
+    .btn.success:hover{filter:brightness(.95)}
+    .hint{margin-top:10px;color:var(--muted);font-size:.85rem;line-height:1.35}
+    .msg{
+      margin-top:12px;
+      padding:12px 12px;
+      border-radius:12px;
+      font-weight:800;
+      display:none;
+    }
+    .msg.show{display:block}
+    .msg.ok{background:rgba(16,185,129,.16);border:1px solid rgba(16,185,129,.35);color:#d1fae5}
+    .msg.err{background:rgba(239,68,68,.14);border:1px solid rgba(239,68,68,.30);color:#fee2e2}
+    .small{margin-top:12px;text-align:center;color:var(--muted);font-size:.8rem}
+    .link{
+      color:var(--blue);
+      text-decoration:none;
+      font-weight:800;
+      cursor:pointer;
+    }
+    .loader{
+      width:16px;height:16px;border-radius:50%;
+      border:2px solid rgba(255,255,255,.35);
+      border-top-color:#fff;
+      animation:spin .7s linear infinite;
+      display:none;
+    }
+    .loading .loader{display:inline-block}
+    @keyframes spin{to{transform:rotate(360deg)}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="header">
+      <h1>KES SOLUTIONS</h1>
+      <p>Connexion / Inscription — Gestion des Bons d’Intervention</p>
+    </div>
+
+    <div class="card">
+      <div class="tabs">
+        <button class="tab active" id="tab-login" type="button" onclick="switchMode('login')">🔐 Connexion</button>
+        <button class="tab" id="tab-register" type="button" onclick="switchMode('register')">➕ Inscription</button>
+      </div>
+
+      <!-- LOGIN -->
+      <div class="section active" id="section-login">
+        <label for="loginEmail">Email</label>
+        <input id="loginEmail" type="email" placeholder="ex: contact@kes-solutions.fr" autocomplete="email" />
+
+        <label for="loginPassword">Mot de passe</label>
+        <input id="loginPassword" type="password" placeholder="Votre mot de passe" autocomplete="current-password" />
+
+        <button class="btn primary" id="btnLogin" type="button" onclick="loginUser()">
+          <span class="loader"></span>
+          Se connecter
+        </button>
+
+        <div class="hint">
+          Astuce : si tu n’as pas encore de compte, va sur <span class="link" onclick="switchMode('register')">Inscription</span>.
+        </div>
+      </div>
+
+      <!-- REGISTER -->
+      <div class="section" id="section-register">
+        <label for="regName">Nom</label>
+        <input id="regName" type="text" placeholder="Nom / Société" autocomplete="name" />
+
+        <div class="row">
+          <div>
+            <label for="regEmail">Email</label>
+            <input id="regEmail" type="email" placeholder="ex: contact@kes-solutions.fr" autocomplete="email" />
+          </div>
+          <div>
+            <label for="regPhone">Téléphone</label>
+            <input id="regPhone" type="tel" placeholder="ex: 06 00 00 00 00" autocomplete="tel" />
+          </div>
+        </div>
+
+        <label for="regPassword">Mot de passe</label>
+        <input id="regPassword" type="password" placeholder="Choisis un mot de passe" autocomplete="new-password" />
+
+        <button class="btn success" id="btnRegister" type="button" onclick="registerUser()">
+          <span class="loader"></span>
+          Créer mon compte
+        </button>
+
+        <div class="hint">
+          Après inscription, tu pourras te connecter directement.
+        </div>
+      </div>
+
+      <div id="message" class="msg"></div>
+
+      <div class="small">
+        © KES Solutions — Auth via Google Apps Script
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ✅ TON URL /exec
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyhW3s6Po94l24lSM9wlIAQ3Ff4SBTodTcwzOV26Eq-MKlh_XngYDmxttkAMx9mwV1VDg/exec";
+
+    function switchMode(mode) {
+      const isLogin = mode === "login";
+
+      document.getElementById("tab-login").classList.toggle("active", isLogin);
+      document.getElementById("tab-register").classList.toggle("active", !isLogin);
+
+      document.getElementById("section-login").classList.toggle("active", isLogin);
+      document.getElementById("section-register").classList.toggle("active", !isLogin);
+
+      hideMessage();
+    }
+
+    function showMessage(type, text) {
+      const el = document.getElementById("message");
+      el.className = "msg show " + (type === "ok" ? "ok" : "err");
+      el.textContent = text;
+    }
+    function hideMessage() {
+      const el = document.getElementById("message");
+      el.className = "msg";
+      el.textContent = "";
+    }
+
+    function setLoading(btnId, isLoading) {
+      const btn = document.getElementById(btnId);
+      if (!btn) return;
+      btn.classList.toggle("loading", isLoading);
+      btn.disabled = isLoading;
+    }
+
+    async function postToScript(payload) {
+      const res = await fetch(SCRIPT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" },
+        body: new URLSearchParams(payload).toString()
+      });
+
+      // Si Apps Script renvoie autre chose que JSON, on protège
+      const txt = await res.text();
+      try {
+        return JSON.parse(txt);
+      } catch (e) {
+        throw new Error("Réponse non-JSON: " + txt.slice(0, 160));
+      }
+    }
+
+    async function registerUser() {
+      hideMessage();
+      setLoading("btnRegister", true);
+
+      try {
+        const name = document.getElementById("regName").value.trim();
+        const email = document.getElementById("regEmail").value.trim();
+        const phone = document.getElementById("regPhone").value.trim();
+        const password = document.getElementById("regPassword").value.trim();
+
+        if (!name || !email || !phone || !password) {
+          showMessage("err", "⚠️ Remplis tous les champs (nom, email, téléphone, mot de passe).");
+          return;
+        }
+
+        const r = await postToScript({ action: "register", name, email, phone, password });
+
+        if (r.success) {
+          showMessage("ok", "✅ Compte créé. Tu peux te connecter.");
+          // Préremplir login
+          document.getElementById("loginEmail").value = email;
+          document.getElementById("loginPassword").value = password;
+          switchMode("login");
+        } else {
+          showMessage("err", "❌ " + (r.message || "Erreur inscription"));
+        }
+      } catch (err) {
+        showMessage("err", "❌ Erreur connexion au serveur : " + (err.message || err));
+      } finally {
+        setLoading("btnRegister", false);
+      }
+    }
+
+    async function loginUser() {
+      hideMessage();
+      setLoading("btnLogin", true);
+
+      try {
+        const email = document.getElementById("loginEmail").value.trim();
+        const password = document.getElementById("loginPassword").value.trim();
+
+        if (!email || !password) {
+          showMessage("err", "⚠️ Email et mot de passe obligatoires.");
+          return;
+        }
+
+        const r = await postToScript({ action: "login", email, password });
+
+        if (r.success) {
+          // Session simple
+          localStorage.setItem("kes_user", JSON.stringify({
+            email,
+            name: r.name || null,
+            phone: r.phone || null,
+            loggedAt: new Date().toISOString()
+          }));
+
+          showMessage("ok", "✅ Connexion OK. Redirection…");
+          setTimeout(() => {
+            window.location.href = "index.html";
+          }, 400);
+        } else {
+          showMessage("err", "❌ " + (r.message || "Connexion refusée"));
+        }
+      } catch (err) {
+        showMessage("err", "❌ Erreur connexion au serveur : " + (err.message || err));
+      } finally {
+        setLoading("btnLogin", false);
+      }
+    }
+
+    // Option : si déjà connecté, redirige
+    (function autoRedirectIfLogged() {
+      try {
+        const u = JSON.parse(localStorage.getItem("kes_user") || "null");
+        if (u && u.email) {
+          // décommente si tu veux auto-redirect:
+          // window.location.href = "index.html";
+        }
+      } catch(e) {}
+    })();
+  </script>
+</body>
+</html>
