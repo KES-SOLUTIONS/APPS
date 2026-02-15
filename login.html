@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <title>KES Solutions - Connexion</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link rel="stylesheet" href="https://unicons.iconscout.com/release/v2.1.9/css/unicons.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.0/css/bootstrap.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Poppins", sans-serif; }
+    body { background: linear-gradient(135deg, #0f4c5c, #16213e); min-height: 100vh; }
+    a { cursor: pointer; transition: all 200ms linear; text-decoration: none; }
+    .link { color: #0099ff; }
+    .link:hover { color: #0088ee; }
+    h4 { font-weight: 600; }
+    h6 span { padding: 0 20px; text-transform: uppercase; font-weight: 700; }
+    .section { position: relative; width: 100%; display: block; }
+    .full-height { min-height: 100vh; }
+    [type="checkbox"]:checked, [type="checkbox"]:not(:checked) { position: absolute; left: -9999px; }
+    .checkbox:checked + label, .checkbox:not(:checked) + label { position: relative; display: block; text-align: center; width: 60px; height: 16px; border-radius: 8px; padding: 0; margin: 10px auto; cursor: pointer; background-color: #0f4c5c; }
+    .checkbox:checked + label:before, .checkbox:not(:checked) + label:before { position: absolute; display: block; width: 36px; height: 36px; border-radius: 50%; color: #0099ff; background-color: #102770; font-family: 'unicons'; content: '\eb4f'; z-index: 20; top: -10px; left: -10px; line-height: 36px; text-align: center; font-size: 24px; transition: all 0.5s ease; }
+    .checkbox:checked + label:before { transform: translateX(44px) rotate(-270deg); }
+    .card-3d-wrap { position: relative; width: 440px; max-width: 100%; height: 400px; transform-style: preserve-3d; perspective: 800px; margin-top: 60px; }
+    .card-3d-wrapper { width: 100%; height: 100%; position: absolute; top: 0; left: 0; transform-style: preserve-3d; transition: all 600ms ease-out; }
+    .card-front, .card-back { width: 100%; height: 100%; background-color: rgba(15, 76, 92, 0.5); background-image: url('https://s3-us-west-2.amazonaws.com/s.cdpn.io/1462889/pat.svg'); background-position: bottom center; background-repeat: no-repeat; background-size: 300%; position: absolute; border-radius: 6px; left: 0; top: 0; transform-style: preserve-3d; backface-visibility: hidden; }
+    .card-back { transform: rotateY(180deg); }
+    .checkbox:checked ~ .card-3d-wrap .card-3d-wrapper { transform: rotateY(180deg); }
+    .center-wrap { position: absolute; width: 100%; padding: 0 35px; top: 50%; left: 0; transform: translate3d(0, -50%, 35px) perspective(100px); z-index: 20; display: block; }
+    .form-group { position: relative; display: block; margin: 0; padding: 0; }
+    .form-style { padding: 13px 20px; padding-left: 55px; height: 48px; width: 100%; font-weight: 500; border-radius: 4px; font-size: 14px; line-height: 22px; letter-spacing: 0.5px; outline: none; color: #c4c3ca; background-color: #1f2029; border: none; transition: all 200ms linear; box-shadow: 0 4px 8px 0 rgba(21,21,21,.2); }
+    .form-style:focus { box-shadow: 0 4px 8px 0 rgba(21,21,21,.2); }
+    .input-icon { position: absolute; top: 0; left: 18px; height: 48px; font-size: 24px; line-height: 48px; text-align: left; color: #0099ff; transition: all 200ms linear; }
+    .btn { border-radius: 4px; height: 44px; font-size: 13px; font-weight: 600; text-transform: uppercase; transition: all 200ms linear; padding: 0 30px; letter-spacing: 1px; display: inline-flex; align-items: center; justify-content: center; border: none; background-color: #0099ff; color: #fff; box-shadow: 0 8px 24px 0 rgba(0,153,255,.2); cursor: pointer; }
+    .btn:hover { background-color: #0088ee; color: #fff; box-shadow: 0 8px 24px 0 rgba(0,136,238,.2); }
+    .alert { padding: 10px 15px; margin-bottom: 15px; border-radius: 4px; font-size: 13px; display: none; }
+    .alert-danger { background-color: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.5); color: #fca5a5; }
+    .alert-success { background-color: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.5); color: #86efac; }
+    .spinner { border: 3px solid rgba(255, 255, 255, 0.1); border-top: 3px solid #0099ff; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 10px auto; display: none; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <div class="section">
+    <div class="container">
+      <div class="row full-height justify-content-center">
+        <div class="col-12 text-center align-self-center py-5">
+          <div class="section pb-5 pt-5 pt-sm-2 text-center">
+            <h6 class="mb-0 pb-3"><span>Log In </span><span>Sign Up</span></h6>
+            <input class="checkbox" type="checkbox" id="reg-log" />
+            <label for="reg-log"></label>
+            <div class="card-3d-wrap mx-auto">
+              <div class="card-3d-wrapper">
+                <div class="card-front">
+                  <div class="center-wrap">
+                    <div class="section text-center">
+                      <h4 class="mb-4 pb-3">Log In</h4>
+                      <div id="login-alert" class="alert alert-danger"></div>
+                      <div id="login-spinner" class="spinner"></div>
+                      <form id="loginForm" onsubmit="handleLogin(event)">
+                        <div class="form-group">
+                          <input type="email" id="login-email" class="form-style" placeholder="Your Email" required>
+                          <i class="input-icon uil uil-at"></i>
+                        </div>
+                        <div class="form-group mt-2">
+                          <input type="password" id="login-password" class="form-style" placeholder="Your Password" required>
+                          <i class="input-icon uil uil-lock-alt"></i>
+                        </div>
+                        <button type="submit" class="btn mt-4">Login</button>
+                      </form>
+                      <p class="mb-0 mt-4 text-center"><a href="#" class="link" onclick="alert('Contactez votre administrateur'); return false;">Forgot password?</a></p>
+                    </div>
+                  </div>
+                </div>
+                <div class="card-back">
+                  <div class="center-wrap">
+                    <div class="section text-center">
+                      <h4 class="mb-4 pb-3">Sign Up</h4>
+                      <div id="signup-alert" class="alert"></div>
+                      <div id="signup-spinner" class="spinner"></div>
+                      <form id="signupForm" onsubmit="handleSignup(event)">
+                        <div class="form-group">
+                          <input type="text" id="signup-name" class="form-style" placeholder="Your Full Name" required>
+                          <i class="input-icon uil uil-user"></i>
+                        </div>
+                        <div class="form-group mt-2">
+                          <input type="tel" id="signup-phone" class="form-style" placeholder="Phone Number" required>
+                          <i class="input-icon uil uil-phone"></i>
+                        </div>
+                        <div class="form-group mt-2">
+                          <input type="email" id="signup-email" class="form-style" placeholder="Your Email" required>
+                          <i class="input-icon uil uil-at"></i>
+                        </div>
+                        <div class="form-group mt-2">
+                          <input type="password" id="signup-password" class="form-style" placeholder="Password" required minlength="6">
+                          <i class="input-icon uil uil-lock-alt"></i>
+                        </div>
+                        <button type="submit" class="btn mt-4">Register</button>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    // ✅ URL GOOGLE SCRIPT DÉJÀ CONFIGURÉE
+    const GOOGLE_SCRIPT_URL = 'https://script.google.com/a/macros/kopilots.fr/s/AKfycbyzhgx-4jU5yEydhI4IDw1aVDvnA7joaOs1EaHR8GlyrNoDLxDfulCCS4Va-l7fVdMI/exec';
+    
+    function showAlert(id, msg, type='danger') { 
+      const a=document.getElementById(id); 
+      a.className=`alert alert-${type}`; 
+      a.textContent=msg; 
+      a.style.display='block'; 
+      setTimeout(()=>a.style.display='none',5000); 
+    }
+    
+    async function handleLogin(e) { 
+      e.preventDefault(); 
+      const email=document.getElementById('login-email').value;
+      const password=document.getElementById('login-password').value;
+      const spinner=document.getElementById('login-spinner'); 
+      
+      spinner.style.display='block'; 
+      
+      try { 
+        const r=await fetch(GOOGLE_SCRIPT_URL,{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({action:'login',email,password})
+        });
+        const d=await r.json(); 
+        spinner.style.display='none'; 
+        
+        if(d.success) { 
+          localStorage.setItem('user_session',JSON.stringify({
+            email,
+            name:d.name,
+            phone:d.phone,
+            loggedIn:true,
+            loginTime:new Date().toISOString()
+          })); 
+          window.location.href='index.html'; 
+        } else {
+          showAlert('login-alert',d.message||'Email ou mot de passe incorrect'); 
+        }
+      } catch(err) { 
+        spinner.style.display='none'; 
+        showAlert('login-alert','Erreur de connexion'); 
+        console.error(err); 
+      }
+    }
+    
+    async function handleSignup(e) { 
+      e.preventDefault(); 
+      const name=document.getElementById('signup-name').value;
+      const email=document.getElementById('signup-email').value;
+      const phone=document.getElementById('signup-phone').value;
+      const password=document.getElementById('signup-password').value;
+      const spinner=document.getElementById('signup-spinner'); 
+      
+      spinner.style.display='block'; 
+      
+      try { 
+        const r=await fetch(GOOGLE_SCRIPT_URL,{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({action:'register',name,email,phone,password})
+        });
+        const d=await r.json(); 
+        spinner.style.display='none'; 
+        
+        if(d.success) { 
+          showAlert('signup-alert','✅ Inscription réussie ! Vous pouvez maintenant vous connecter.','success'); 
+          document.getElementById('signupForm').reset(); 
+          setTimeout(()=>document.getElementById('reg-log').checked=false,2000); 
+        } else {
+          showAlert('signup-alert',d.message||'Erreur lors de l\'inscription'); 
+        }
+      } catch(err) { 
+        spinner.style.display='none'; 
+        showAlert('signup-alert','Erreur de connexion'); 
+        console.error(err); 
+      }
+    }
+    
+    window.addEventListener('DOMContentLoaded',()=>{ 
+      const s=localStorage.getItem('user_session'); 
+      if(s) {
+        try { 
+          if(JSON.parse(s).loggedIn) window.location.href='index.html'; 
+        } catch(e){} 
+      }
+    });
+  </script>
+</body>
+</html>
