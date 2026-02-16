@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>KES Solutions - Bons d'Intervention</title>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300..800&display=swap" rel="stylesheet">
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Open Sans', sans-serif; }
+    body { display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; background: #070707; color: #fff; padding: 50px 20px; }
+    
+    .bg-animation { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 100%; max-width: 900px; height: 100vh; z-index: -1; display: flex; justify-content: center; align-items: center; }
+    .bg-animation i { position: absolute; inset: 0; border: 1.5px solid #fff; transition: .5s; border-radius: 40px; }
+    .bg-animation i:nth-child(1) { animation: animate 5s linear infinite; --clr: #0078ff; }
+    .bg-animation i:nth-child(2) { animation: animate 7s linear infinite; --clr: #ffffff; }
+    .bg-animation i:nth-child(3) { animation: animate 11s linear infinite; --clr: #cb0fd1; }
+    @keyframes animate { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+    .container { position: relative; width: 100%; max-width: 800px; z-index: 1; }
+    .header { text-align: center; margin-bottom: 40px; }
+    .header h1 { font-size: 2.5em; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 5px; }
+    .header .subtitle { color: #0078ff; font-weight: 700; letter-spacing: 3px; font-size: 0.8em; }
+    
+    .logout-btn { background: transparent; border: 1.5px solid #ef4444; color: #ef4444; padding: 6px 18px; border-radius: 40px; cursor: pointer; transition: 0.3s; font-weight: 600; font-size: 0.75rem; margin-top: 10px; }
+    .logout-btn:hover { background: #ef4444; color: #fff; }
+
+    .tabs { display: flex; gap: 10px; margin-bottom: 30px; background: rgba(255,255,255,0.05); padding: 8px; border-radius: 50px; }
+    .tab-btn { flex: 1; padding: 12px; border: none; border-radius: 40px; background: transparent; color: #fff; cursor: pointer; font-weight: 700; transition: 0.3s; font-size: 0.9em; }
+    .tab-btn.active { background: linear-gradient(45deg, #0d10d8, #cb0fd1); box-shadow: 0 0 15px rgba(203, 15, 209, 0.4); }
+
+    .tab-content { display: none; animation: fadeIn 0.5s ease; }
+    .tab-content.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    .glass-card { background: rgba(255, 255, 255, 0.03); border: 2px solid rgba(255, 255, 255, 0.1); border-radius: 35px; padding: 30px; margin-bottom: 25px; backdrop-filter: blur(10px); }
+    .section-title { font-size: 1.1em; font-weight: 800; color: #fff; margin-bottom: 20px; text-transform: uppercase; }
+    
+    .form-input, .form-select, .form-textarea { width: 100%; padding: 14px 25px; background: transparent; border: 2px solid #fff; border-radius: 40px; color: #fff; font-size: 0.95em; outline: none; transition: 0.3s; margin-bottom: 15px; }
+    .form-textarea { border-radius: 25px; resize: vertical; }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+    .btn { width: 100%; padding: 16px; border: none; border-radius: 40px; font-weight: 700; cursor: pointer; transition: 0.3s; text-transform: uppercase; letter-spacing: 1px; }
+    .btn-primary { background: linear-gradient(45deg, #0d10d8, #cb0fd1); color: #fff; }
+    .btn-secondary { background: transparent; border: 2px solid #fff; color: #fff; }
+    .btn-success { background: #10b981; color: #fff; }
+    .btn-danger { background: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; color: #ef4444; padding: 6px 15px; font-size: 0.7em; border-radius: 40px; }
+
+    .preview-card { text-align: center; border: 2px solid #0078ff; }
+    .preview-number { font-size: 2.8em; font-weight: 800; color: #0078ff; }
+
+    .signature-container { background: #fff; border-radius: 25px; padding: 10px; margin: 15px 0; }
+    .signature-canvas { width: 100%; border-radius: 20px; cursor: crosshair; background: #fff; display: block; }
+    
+    .photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 10px; margin-top: 15px; }
+    .photo-item { position: relative; width: 80px; height: 80px; }
+    .photo-item img { width: 100%; height: 100%; object-fit: cover; border-radius: 10px; }
+    .remove-photo { position: absolute; top: -5px; right: -5px; background: #ef4444; color: #fff; border: none; border-radius: 50%; width: 20px; height: 20px; cursor: pointer; }
+
+    .history-item { background: rgba(255,255,255,0.05); border: 1.5px solid rgba(255,255,255,0.1); border-radius: 25px; padding: 20px; margin-bottom: 15px; border-left: 6px solid #cb0fd1; }
+    .history-bon { color: #0078ff; font-weight: 800; }
+  </style>
+</head>
+
+<body>
+  <div class="bg-animation"><i></i><i></i><i></i></div>
+
+  <div class="container">
+    <div class="header">
+      <h1>KES SOLUTIONS</h1>
+      <p class="subtitle">KOPILOTS ENERGIE SYSTEME</p>
+      <button class="logout-btn" onclick="logout()">🚪 Déconnexion</button>
+    </div>
+
+    <div class="tabs">
+      <button class="tab-btn" id="tab-profile" onclick="switchTab('profile')">PROFIL</button>
+      <button class="tab-btn active" id="tab-new-bon" onclick="switchTab('new-bon')">NOUVEAU</button>
+      <button class="tab-btn" id="tab-history" onclick="switchTab('history')">HISTORIQUE</button>
+    </div>
+
+    <div id="content-profile" class="tab-content">
+      <div class="glass-card">
+        <h2 class="section-title">👤 Entreprise</h2>
+        <input type="text" id="companyName" class="form-input" placeholder="Nom Entreprise">
+        <input type="text" id="siren" class="form-input" placeholder="SIREN">
+        <input type="text" id="technicianName" class="form-input" placeholder="Nom du Technicien">
+        <button onclick="saveProfile()" class="btn btn-primary">Enregistrer le Profil</button>
+      </div>
+    </div>
+
+    <div id="content-new-bon" class="tab-content active">
+      <div class="glass-card preview-card">
+        <p style="font-size: 0.8em; opacity: 0.6;">BON D'INTERVENTION N°</p>
+        <p class="preview-number" id="nextBonNumber">-</p>
+      </div>
+
+      <div class="glass-card">
+        <h3 class="section-title">👤 Info Client</h3>
+        <input type="text" id="clientName" class="form-input" placeholder="Nom du Client">
+        <input type="text" id="clientAddress" class="form-input" placeholder="Adresse complète">
+        <div class="grid-2">
+          <input type="date" id="arrivalDate" class="form-input">
+          <input type="time" id="arrivalTime" class="form-input">
+        </div>
+      </div>
+
+      <div class="glass-card">
+        <h3 class="section-title">🔧 Intervention</h3>
+        <select id="natureIntervention" class="form-select">
+          <option value="">-- Type d'intervention --</option>
+          <option value="Fuite">Fuite</option>
+          <option value="Dépannage">Dépannage</option>
+          <option value="Diagnostique">Diagnostic</option>
+          <option value="Entretien annuel">Entretien annuel</option>
+        </select>
+        <div id="interventions-container"></div>
+        <button class="btn btn-secondary" onclick="addIntervention()">➕ Ajouter Équipement</button>
+      </div>
+
+      <div class="glass-card">
+        <h3 class="section-title">📝 Comptes-rendus</h3>
+        <textarea id="description" rows="3" class="form-textarea" placeholder="Travaux effectués..."></textarea>
+        <textarea id="observations" rows="2" class="form-textarea" placeholder="Observations / Pièces à prévoir..."></textarea>
+      </div>
+
+      <div class="glass-card">
+        <h3 class="section-title">📸 Photos</h3>
+        <input type="file" id="photoFiles" class="form-input" accept="image/*" multiple>
+        <div id="photoPreviewContainer" class="photo-grid"></div>
+      </div>
+
+      <div class="glass-card">
+        <h3 class="section-title">✍️ Signature</h3>
+        <input type="text" id="signatureName" class="form-input" placeholder="Nom du signataire">
+        <div class="signature-container">
+          <canvas id="signatureCanvas" class="signature-canvas" height="150"></canvas>
+        </div>
+        <div class="grid-2">
+          <button onclick="clearSignature()" class="btn btn-secondary">Effacer</button>
+          <button onclick="saveSignatureAction()" class="btn btn-success">Valider</button>
+        </div>
+        <p id="signatureStatus" style="text-align:center; margin-top:10px; font-size:0.8em;"></p>
+      </div>
+
+      <button onclick="resetNewBon()" class="btn btn-secondary" style="margin-bottom:15px; border-color: #cb0fd1; color: #cb0fd1;">🔄 Nouveau Bon (Reset)</button>
+      <button onclick="generatePDF()" class="btn btn-primary" style="padding:20px; font-size:1.1em">Générer & Envoyer au Sheet</button>
+    </div>
+
+    <div id="content-history" class="tab-content">
+      <div class="glass-card">
+        <h2 class="section-title">📋 Archives</h2>
+        <div id="history-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbzfC7vC0yR567I4v4n9P9qV5hI8z-0-0-0/exec'; 
+
+    let signatureData = null;
+    let capturedPhotos = [];
+
+    window.onload = function() {
+      switchTab('new-bon');
+      loadProfile();
+      updateBonNumber();
+      initSignatureCanvas();
+      loadHistory();
+      
+      const now = new Date();
+      document.getElementById('arrivalDate').valueAsDate = now;
+      document.getElementById('arrivalTime').value = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
+      document.getElementById('photoFiles').addEventListener('change', handlePhotos);
+    };
+
+    function switchTab(t) {
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('content-'+t).classList.add('active');
+      document.getElementById('tab-'+t).classList.add('active');
+      if(t === 'new-bon') setTimeout(initSignatureCanvas, 100);
+    }
+
+    function handlePhotos(e) {
+      Array.from(e.target.files).forEach(file => {
+        const reader = new FileReader();
+        reader.onload = (ev) => { capturedPhotos.push(ev.target.result); renderPhotos(); };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function renderPhotos() {
+      const c = document.getElementById('photoPreviewContainer');
+      c.innerHTML = capturedPhotos.map((s, i) => `<div class="photo-item"><img src="${s}"><button class="remove-photo" onclick="removePhoto(${i})">×</button></div>`).join('');
+    }
+
+    function removePhoto(i) { capturedPhotos.splice(i,1); renderPhotos(); }
+
+    function saveProfile() {
+      const p = { company: document.getElementById('companyName').value, siren: document.getElementById('siren').value, tech: document.getElementById('technicianName').value };
+      localStorage.setItem('kes_profile', JSON.stringify(p));
+      alert("Profil sauvegardé !");
+    }
+
+    function loadProfile() {
+      const p = JSON.parse(localStorage.getItem('kes_profile') || '{}');
+      document.getElementById('companyName').value = p.company || '';
+      document.getElementById('siren').value = p.siren || '';
+      document.getElementById('technicianName').value = p.tech || '';
+    }
+
+    function initSignatureCanvas() {
+      const canvas = document.getElementById('signatureCanvas');
+      if(!canvas) return;
+      const ctx = canvas.getContext('2d');
+      canvas.width = canvas.offsetWidth;
+      let drawing = false;
+      const getPos = (e) => {
+        const r = canvas.getBoundingClientRect();
+        const x = (e.touches ? e.touches[0].clientX : e.clientX) - r.left;
+        const y = (e.touches ? e.touches[0].clientY : e.clientY) - r.top;
+        return { x, y };
+      };
+      canvas.onmousedown = canvas.ontouchstart = (e) => { drawing = true; ctx.beginPath(); const p = getPos(e); ctx.moveTo(p.x, p.y); };
+      canvas.onmousemove = canvas.ontouchmove = (e) => { if(!drawing) return; const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); e.preventDefault(); };
+      canvas.onmouseup = canvas.ontouchend = () => drawing = false;
+    }
+
+    function clearSignature() { 
+      const canvas = document.getElementById('signatureCanvas');
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      signatureData = null; 
+      document.getElementById('signatureStatus').innerText = "";
+    }
+    
+    function saveSignatureAction() { signatureData = document.getElementById('signatureCanvas').toDataURL(); document.getElementById('signatureStatus').innerText = "✅ Signature validée"; }
+
+    function addIntervention() {
+      const div = document.createElement('div');
+      div.className = 'intervention-item';
+      div.style = "display:flex; gap:10px; margin-bottom:10px;";
+      div.innerHTML = `<input type="text" class="form-input" placeholder="Equipement" style="flex:2; margin:0"><input type="text" class="form-input" placeholder="Modèle" style="flex:1; margin:0"><button class="btn-danger" onclick="this.parentElement.remove()">X</button>`;
+      document.getElementById('interventions-container').appendChild(div);
+    }
+
+    function updateBonNumber() { 
+      const lastNum = parseInt(localStorage.getItem('kes_last_num') || 1000);
+      document.getElementById('nextBonNumber').innerText = lastNum + 1; 
+    }
+
+    function resetNewBon() {
+      // Nettoyage des champs texte et select
+      document.getElementById('clientName').value = "";
+      document.getElementById('clientAddress').value = "";
+      document.getElementById('natureIntervention').value = "";
+      document.getElementById('description').value = "";
+      document.getElementById('observations').value = "";
+      document.getElementById('signatureName').value = "";
+      document.getElementById('photoFiles').value = "";
+      
+      // Reset Date et Heure
+      const now = new Date();
+      document.getElementById('arrivalDate').valueAsDate = now;
+      document.getElementById('arrivalTime').value = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
+      
+      // Reset Interventions
+      document.getElementById('interventions-container').innerHTML = "";
+      
+      // Reset Photos
+      capturedPhotos = [];
+      renderPhotos();
+      
+      // Reset Signature
+      clearSignature();
+      
+      // Incrémentation automatique du numéro de bon
+      const currentNum = parseInt(document.getElementById('nextBonNumber').innerText);
+      localStorage.setItem('kes_last_num', currentNum);
+      updateBonNumber();
+      
+      window.scrollTo(0,0);
+    }
+
+    async function generatePDF() {
+      try {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+        
+        const bonNum = document.getElementById('nextBonNumber').innerText;
+        const client = document.getElementById('clientName').value;
+        const profile = JSON.parse(localStorage.getItem('kes_profile') || '{}');
+        const dateVal = document.getElementById('arrivalDate').value;
+        const timeVal = document.getElementById('arrivalTime').value;
+        const addrVal = document.getElementById('clientAddress').value;
+        const natureVal = document.getElementById('natureIntervention').value;
+        const obsVal = document.getElementById('observations').value;
+        const descVal = document.getElementById('description').value;
+        const signName = document.getElementById('signatureName').value;
+
+        // 1. ENVOI AU GOOGLE SHEET
+        const payload = { num: bonNum, client: client, adresse: addrVal, date: dateVal, nature: natureVal, description: descVal, technicien: profile.tech || '---' };
+        fetch(scriptURL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) }).catch(e => console.log("Sheet Error"));
+
+        // 2. DESIGN PDF
+        const blueDark = [0, 51, 89];
+        doc.setFillColor(blueDark[0], blueDark[1], blueDark[2]);
+        doc.rect(0, 0, 210, 35, 'F');
+
+        doc.setTextColor(255, 255, 255);
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(18);
+        doc.text("Fiche d'interventions", 120, 15);
+        doc.text("N° " + bonNum, 120, 25);
+
+        doc.setTextColor(50, 50, 50);
+        doc.setFontSize(10);
+        doc.setFont("helvetica", "normal");
+        let yTop = 50;
+        doc.text("Date et début : " + dateVal + " " + timeVal, 15, yTop);
+        doc.text("Intervenant : " + (profile.tech || ""), 15, yTop + 10);
+        doc.text("Client : " + client, 115, yTop);
+        doc.text("Adresse : " + addrVal, 115, yTop + 10);
+
+        let blockY = 75;
+        doc.setDrawColor(blueDark[0], blueDark[1], blueDark[2]);
+        doc.rect(15, blockY, 85, 30);
+        doc.setFillColor(blueDark[0], blueDark[1], blueDark[2]);
+        doc.rect(15, blockY, 65, 7, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(9);
+        doc.text("Nature", 18, blockY + 5);
+        doc.setTextColor(0, 0, 0);
+        doc.text(natureVal, 18, blockY + 15);
+
+        doc.rect(110, blockY, 85, 30);
+        doc.setFillColor(blueDark[0], blueDark[1], blueDark[2]);
+        doc.rect(110, blockY, 60, 7, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.text("Observations", 113, blockY + 5);
+        doc.setTextColor(0, 0, 0);
+        doc.text(obsVal, 113, blockY + 15, { maxWidth: 80 });
+
+        let descY = blockY + 40;
+        doc.rect(15, descY, 180, 40);
+        doc.setFillColor(blueDark[0], blueDark[1], blueDark[2]);
+        doc.rect(15, descY, 40, 7, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.text("Description", 18, descY + 5);
+        doc.setTextColor(0, 0, 0);
+        doc.text(descVal, 18, descY + 15, { maxWidth: 170 });
+
+        let tableY = descY + 50;
+        doc.setFillColor(blueDark[0], blueDark[1], blueDark[2]);
+        doc.rect(15, tableY, 180, 8, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.text("Equipement", 20, tableY + 5);
+        doc.text("Modèle", 100, tableY + 5);
+
+        let rowY = tableY + 8;
+        const items = document.querySelectorAll('#interventions-container .intervention-item');
+        items.forEach(item => {
+          const inputs = item.querySelectorAll('input');
+          doc.setTextColor(0,0,0);
+          doc.text(inputs[0].value, 20, rowY + 7);
+          doc.text(inputs[1].value, 100, rowY + 7);
+          rowY += 10;
+        });
+
+        if(signatureData) {
+          doc.text("Signature (" + signName + ") :", 140, rowY + 10);
+          doc.addImage(signatureData, 'PNG', 140, rowY + 15, 40, 20);
+        }
+
+        if(capturedPhotos.length > 0) {
+          doc.addPage();
+          doc.text("Photos annexes", 15, 15);
+          capturedPhotos.forEach((img, i) => doc.addImage(img, 'JPEG', 15, 20 + (i*65), 100, 60));
+        }
+
+        doc.save(`Fiche_${bonNum}.pdf`);
+        const history = JSON.parse(localStorage.getItem('kes_history') || '[]');
+        history.unshift({ num: bonNum, client: client, date: dateVal });
+        localStorage.setItem('kes_history', JSON.stringify(history));
+        localStorage.setItem('kes_last_num', bonNum);
+        updateBonNumber();
+        alert("PDF généré avec succès !");
+      } catch (err) {
+        alert("Erreur génération PDF : " + err.message);
+        console.error(err);
+      }
+    }
+
+    function loadHistory() {
+      const h = JSON.parse(localStorage.getItem('kes_history') || '[]');
+      document.getElementById('history-list').innerHTML = h.map(x => `<div class="history-item"><span class="history-bon">#${x.num}</span> - ${x.client} (${x.date})</div>`).join('');
+    }
+
+    function logout() { window.location.href = "login.html"; }
+  </script>
+</body>
+</html>
