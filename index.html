@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>KES Solutions - Maintenance & Bons</title>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300..800&display=swap" rel="stylesheet">
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Open Sans', sans-serif; }
+    body { display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; background: #070707; color: #fff; padding: 50px 20px; transition: background 0.3s, color 0.3s; }
+    
+    .bg-animation { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 100%; max-width: 900px; height: 100vh; z-index: -1; display: flex; justify-content: center; align-items: center; }
+    .bg-animation i { position: absolute; inset: 0; border: 1.5px solid #fff; transition: .5s; border-radius: 40px; }
+    .bg-animation i:nth-child(1) { animation: animate 5s linear infinite; --clr: #0078ff; }
+    .bg-animation i:nth-child(2) { animation: animate 7s linear infinite; --clr: #ffffff; }
+    .bg-animation i:nth-child(3) { animation: animate 11s linear infinite; --clr: #cb0fd1; }
+    @keyframes animate { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+    .container { position: relative; width: 100%; max-width: 800px; z-index: 1; }
+    .header { text-align: center; margin-bottom: 40px; }
+    
+    .tabs { display: flex; gap: 5px; margin-bottom: 30px; background: rgba(255,255,255,0.05); padding: 8px; border-radius: 50px; overflow-x: auto; }
+    .tab-btn { flex: 1; padding: 12px 15px; border: none; border-radius: 40px; background: transparent; color: #fff; cursor: pointer; font-weight: 700; transition: 0.3s; font-size: 0.75em; white-space: nowrap; }
+    .tab-btn.active { background: linear-gradient(45deg, #0d10d8, #cb0fd1); }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    .glass-card { background: rgba(255, 255, 255, 0.03); border: 2px solid rgba(255, 255, 255, 0.1); border-radius: 35px; padding: 25px; margin-bottom: 25px; backdrop-filter: blur(10px); }
+    .section-title { font-size: 1.1em; font-weight: 800; color: #fff; margin-bottom: 20px; text-transform: uppercase; }
+    
+    .form-input, .form-select, .form-textarea { width: 100%; padding: 14px 25px; background: transparent; border: 2px solid #fff; border-radius: 40px; color: #fff; font-size: 1em; outline: none; margin-bottom: 15px; }
+    
+    .btn { width: 100%; padding: 16px; border: none; border-radius: 40px; font-weight: 700; cursor: pointer; transition: 0.3s; text-transform: uppercase; }
+    .btn-primary { background: linear-gradient(45deg, #0d10d8, #cb0fd1); color: #fff; }
+
+    #signature-pad { border: 2px dashed rgba(255,255,255,0.3); background: #fff; border-radius: 20px; touch-action: none; cursor: crosshair; display: block; margin: 0 auto; }
+    #signature-pad.disabled { opacity: 0.2; pointer-events: none; }
+
+    .maint-item { background: rgba(255,255,255,0.05); border-radius: 20px; padding: 15px; margin-bottom: 10px; border-left: 5px solid #4CAF50; }
+    
+    .client-photo-preview { width: 100%; max-height: 150px; object-fit: contain; border-radius: 15px; margin-top: 10px; border: 1px solid rgba(255,255,255,0.2); display: none; }
+    .card-photo { width: 100px; height: 100px; object-fit: cover; border-radius: 10px; margin-top: 10px; cursor: pointer; border: 1px solid #fff; }
+
+    body.light-mode { background: #ffffff !important; color: #000000 !important; }
+    body.light-mode .glass-card { background: rgba(0, 0, 0, 0.05) !important; border: 2px solid #000000 !important; }
+    body.light-mode .form-input, body.light-mode .form-select, body.light-mode .form-textarea { border-color: #000000 !important; color: #000000 !important; }
+
+    .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin-top: 15px; }
+    .calendar-day { aspect-ratio: 1; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 0.9em; cursor: pointer; background: rgba(255,255,255,0.02); transition: 0.2s; }
+    .calendar-day:hover { background: rgba(255,255,255,0.1); }
+    .calendar-day.has-event { border: 2px solid #cb0fd1; background: rgba(203, 15, 209, 0.15); font-weight: bold; }
+    .calendar-day.today { border: 2px solid #0078ff; color: #0078ff; }
+
+    /* TIMELINE STYLES */
+    .timeline-container { position: relative; margin-top: 20px; border-left: 1px solid rgba(255,255,255,0.1); padding-left: 35px; }
+    .timeline-row { position: relative; min-height: 70px; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; align-items: flex-start; padding: 10px 0; }
+    .timeline-hour { position: absolute; left: -45px; top: 10px; font-size: 0.75em; color: rgba(255,255,255,0.4); font-weight: bold; }
+    .timeline-events-wrapper { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+    .timeline-card { background: rgba(255,255,255,0.07); border-radius: 12px; padding: 12px; border-left: 4px solid #cb0fd1; transition: 0.2s; }
+    .timeline-card.m { border-left-color: #4CAF50; }
+    .view-header { display: flex; align-items: center; gap: 15px; margin-bottom: 25px; }
+    .btn-back { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 10px 20px; border-radius: 40px; cursor: pointer; font-size: 0.8em; font-weight: bold; text-transform: uppercase; }
+  </style>
+</head>
+
+<body>
+  <button onclick="toggleTheme()" id="theme-toggle" style="position: fixed; top: 10px; right: 10px; z-index: 9999; padding: 10px; border-radius: 50%; border: 2px solid #fff; background: rgba(0,0,0,0.5); cursor: pointer; font-size: 20px;">☀️</button>
+
+  <div class="bg-animation"><i></i><i></i><i></i></div>
+
+  <div class="container">
+    <div class="header"><h1>KES SOLUTIONS</h1></div>
+
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('profile')">PROFIL</button>
+      <button class="tab-btn" onclick="switchTab('new')">ÉDITION</button>
+      <button class="tab-btn" onclick="switchTab('clients'); renderClients();">CLIENTS</button>
+      <button class="tab-btn" onclick="switchTab('maint'); renderMaintenance();">MAINTENANCE</button>
+      <button class="tab-btn" onclick="switchTab('hist'); renderHistory();">HISTORIQUE</button>
+      <button class="tab-btn" onclick="switchTab('planning'); renderPlanning();">PLANNING</button>
+    </div>
+
+    <div id="content-profile" class="tab-content active">
+      <div class="glass-card">
+        <h2 class="section-title">👤 Mon Entreprise</h2>
+        <input type="text" id="p-nom" class="form-input" placeholder="Nom / Raison Sociale *">
+        <input type="text" id="p-adresse" class="form-input" placeholder="Adresse complète *">
+        <input type="text" id="p-tel" class="form-input" placeholder="Téléphone *">
+        <input type="email" id="p-email" class="form-input" placeholder="Email *">
+        <input type="file" id="p-logo-file" class="form-input" accept="image/*" onchange="handleLogo(event)">
+        <center><img id="logo-preview" style="max-width:120px; display:none; border-radius:10px; margin-bottom:10px;"></center>
+        <button onclick="saveProfile()" class="btn btn-primary">Enregistrer</button>
+        <button onclick="logout()" class="btn" style="background: #ff4d4d; margin-top: 15px; padding: 10px;">Déconnexion</button>
+      </div>
+    </div>
+
+    <div id="content-new" class="tab-content">
+      <div id="lock-message" class="glass-card" style="border-color: #ff4d4d; text-align: center;">
+        <p style="color: #ff4d4d; font-weight: bold;">⚠️ Complétez votre PROFIL d'abord.</p>
+      </div>
+      <div id="editor-fields" style="display: none;">
+         <div class="glass-card">
+           <button onclick="createNewBon()" class="btn" style="background: #4CAF50; margin-bottom: 15px;">+ Nouveau bon</button>
+           <h3 class="section-title">📄 Détails du Bon</h3>
+           <select id="doc-type" class="form-select">
+             <option value="ENTRETIENT">Entretient</option>
+             <option value="DEPANNAGE">Dépannage</option>
+             <option value="FACTURE">Facture</option>
+           </select>
+           <input type="text" id="client-name" class="form-input" placeholder="Nom du Client">
+           <textarea id="doc-details" class="form-textarea" rows="4" placeholder="Détails de l'intervention"></textarea>
+           <canvas id="signature-pad" width="400" height="200" style="background:#fff; border-radius:20px;"></canvas>
+           <button type="button" class="btn" onclick="clearSignature()" style="background:#ff4d4d; padding: 10px; margin-top:10px;">Effacer</button>
+         </div>
+         <button onclick="generatePDF()" class="btn btn-primary">Générer le PDF</button>
+      </div>
+    </div>
+
+    <div id="content-clients" class="tab-content">
+      <div class="glass-card">
+        <h2 class="section-title">👥 Nouveau Client</h2>
+        <select id="c-type" class="form-select">
+          <option value="Particulier">Particulier</option>
+          <option value="Société">Société</option>
+        </select>
+        <input type="text" id="c-nom" class="form-input" placeholder="Nom ou Raison Sociale *">
+        <input type="text" id="c-adresse" class="form-input" placeholder="Adresse complète">
+        <input type="text" id="c-marque" class="form-input" placeholder="Modèle / Marque Chaudière">
+        <label style="font-size: 0.8em; margin-left: 10px;">📸 Photo Plaque Signalétique :</label>
+        <input type="file" id="c-photo-file" class="form-input" accept="image/*" onchange="handleClientPhoto(event)">
+        <center><img id="c-photo-preview" class="client-photo-preview"></center>
+        <button onclick="saveClient()" class="btn btn-primary" style="margin-top:10px;">Enregistrer le client</button>
+      </div>
+      <div class="glass-card">
+        <h2 class="section-title">🗂️ Liste des Clients</h2>
+        <div id="clients-list"></div>
+      </div>
+    </div>
+
+    <div id="content-maint" class="tab-content">
+      <div class="glass-card">
+        <h2 class="section-title">📅 Rappels de Maintenance</h2>
+        <input type="text" id="m-client" class="form-input" placeholder="Nom du Client">
+        <input type="text" id="m-agence" class="form-input" placeholder="Agence du passage">
+        <label style="font-size: 0.8em; margin: 10px 0 5px 15px; display: block;">Date du passage :</label>
+        <input type="date" id="m-date-passage" class="form-input">
+        <label style="font-size: 0.8em; margin: 10px 0 5px 15px; display: block;">Prochaine intervention :</label>
+        <input type="date" id="m-date-prochain" class="form-input">
+        <button onclick="addMaintenance()" class="btn btn-primary">Enregistrer Maintenance</button>
+        <hr style="margin: 25px 0; opacity: 0.1;">
+        <div id="maint-list"></div>
+      </div>
+    </div>
+
+    <div id="content-hist" class="tab-content">
+      <div class="glass-card">
+        <h2 class="section-title">Historique des bons</h2>
+        <div id="history-list"></div>
+      </div>
+    </div>
+
+    <div id="content-planning" class="tab-content">
+        <div id="view-month">
+            <div class="glass-card">
+                <h2 class="section-title">📅 Agenda Mensuel</h2>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                    <button onclick="changeMonth(-1)" style="background:none; border:none; color:#fff; cursor:pointer; font-size:1.5em;">◀</button>
+                    <h3 id="calendar-month-year" style="font-size:1.2em;"></h3>
+                    <button onclick="changeMonth(1)" style="background:none; border:none; color:#fff; cursor:pointer; font-size:1.5em;">▶</button>
+                </div>
+                <div class="calendar-grid" id="calendar-body"></div>
+            </div>
+
+            <div class="glass-card">
+                <h2 class="section-title">➕ Ajouter une intervention</h2>
+                <input type="text" id="plan-title" class="form-input" placeholder="Titre de l'événement">
+                <input type="date" id="plan-date" class="form-input">
+                <input type="time" id="plan-time" class="form-input">
+                <textarea id="plan-note" class="form-textarea" placeholder="Notes (facultatif)"></textarea>
+                <input type="hidden" id="plan-edit-id">
+                <button onclick="savePlanning()" id="btn-save-plan" class="btn btn-primary">Ajouter au planning</button>
+            </div>
+        </div>
+
+        <div id="view-day-detail" style="display:none;">
+            <div class="glass-card">
+                <div class="view-header">
+                    <button class="btn-back" onclick="closeDayDetail()">← RETOUR CALENDRIER</button>
+                    <h2 class="section-title" id="detail-day-title" style="margin-bottom:0;">Agenda</h2>
+                </div>
+                <div id="timeline-body" class="timeline-container"></div>
+            </div>
+        </div>
+    </div>
+  </div>
+
+  <script>
+    if (sessionStorage.getItem('kes_authenticated') !== 'true') {
+        window.location.href = 'login.html';
+    }
+
+    let tempClientPhoto = null;
+    let isDrawing = false;
+    let currentMonth = new Date();
+    let selectedDate = null;
+
+    window.onload = function() {
+      loadProfile();
+      validateProfile();
+      renderClients();
+      initSignaturePad();
+      requestNotifyPermission();
+      renderPlanning();
+      checkNotifications();
+      setInterval(checkNotifications, 60000);
+    };
+
+    function logout() { sessionStorage.clear(); window.location.href = 'login.html'; }
+    function toggleTheme() { document.body.classList.toggle('light-mode'); }
+    function switchTab(t) {
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('content-'+t).classList.add('active');
+    }
+
+    function handleClientPhoto(event) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        tempClientPhoto = e.target.result;
+        const img = document.getElementById('c-photo-preview');
+        img.src = tempClientPhoto; img.style.display = 'block';
+      };
+      if(event.target.files[0]) reader.readAsDataURL(event.target.files[0]);
+    }
+
+    function saveClient() {
+      const nom = document.getElementById('c-nom').value;
+      const type = document.getElementById('c-type').value;
+      const addr = document.getElementById('c-adresse').value;
+      const marque = document.getElementById('c-marque').value;
+      if (!nom) return alert("Le nom est obligatoire");
+      let clients = JSON.parse(localStorage.getItem('kes_clients_list') || '[]');
+      clients.push({ id: Date.now(), nom, type, adresse: addr, marque, photo: tempClientPhoto });
+      localStorage.setItem('kes_clients_list', JSON.stringify(clients));
+      document.getElementById('c-nom').value = ""; document.getElementById('c-adresse').value = "";
+      document.getElementById('c-marque').value = ""; document.getElementById('c-photo-preview').style.display = 'none';
+      tempClientPhoto = null;
+      alert("Client ajouté !");
+      renderClients();
+    }
+
+    function renderClients() {
+      const list = document.getElementById('clients-list');
+      const clients = JSON.parse(localStorage.getItem('kes_clients_list') || '[]');
+      list.innerHTML = clients.length === 0 ? "<p>Aucun client.</p>" : "";
+      clients.forEach(c => {
+        const div = document.createElement('div');
+        div.className = 'maint-item';
+        div.style.borderLeftColor = c.type === 'Société' ? '#cb0fd1' : '#0078ff';
+        div.innerHTML = `<div style="display:flex; justify-content:space-between;"><div><strong>${c.nom}</strong><br><small>${c.adresse || ''}</small></div><button onclick="deleteClient(${c.id})" style="background:#ff4d4d; color:white; border:none; padding:5px 10px; border-radius:8px;">X</button></div>`;
+        list.appendChild(div);
+      });
+    }
+
+    function deleteClient(id) {
+      if(!confirm("Supprimer ?")) return;
+      let clients = JSON.parse(localStorage.getItem('kes_clients_list') || '[]');
+      localStorage.setItem('kes_clients_list', JSON.stringify(clients.filter(c => c.id !== id)));
+      renderClients();
+    }
+
+    function saveProfile() {
+      const p = { nom: document.getElementById('p-nom').value, addr: document.getElementById('p-adresse').value, mail: document.getElementById('p-email').value };
+      localStorage.setItem('kes_user_profile', JSON.stringify(p));
+      validateProfile(); alert("Profil sauvé");
+    }
+
+    function loadProfile() {
+      const p = JSON.parse(localStorage.getItem('kes_user_profile') || '{}');
+      if(p.nom) { document.getElementById('p-nom').value = p.nom; document.getElementById('p-adresse').value = p.addr; document.getElementById('p-email').value = p.mail; }
+    }
+
+    function validateProfile() {
+      const p = JSON.parse(localStorage.getItem('kes_user_profile') || '{}');
+      const ok = p.nom && p.addr;
+      document.getElementById('lock-message').style.display = ok ? 'none' : 'block';
+      document.getElementById('editor-fields').style.display = ok ? 'block' : 'none';
+    }
+
+    function initSignaturePad() {
+      const c = document.getElementById('signature-pad');
+      const ctx = c.getContext('2d'); ctx.lineWidth = 3;
+      const s = () => { isDrawing = true; ctx.beginPath(); };
+      const m = (e) => { 
+        if(!isDrawing) return; 
+        const r = c.getBoundingClientRect();
+        ctx.lineTo((e.touches ? e.touches[0].clientX : e.clientX) - r.left, (e.touches ? e.touches[0].clientY : e.clientY) - r.top);
+        ctx.stroke();
+      };
+      c.addEventListener('mousedown', s); c.addEventListener('mousemove', m); window.addEventListener('mouseup', () => isDrawing = false);
+      c.addEventListener('touchstart', s); c.addEventListener('touchmove', m);
+    }
+
+    function clearSignature() { document.getElementById('signature-pad').getContext('2d').clearRect(0, 0, 400, 200); }
+    function createNewBon() { document.getElementById('client-name').value = ""; clearSignature(); }
+    function generatePDF() { alert("PDF Simulation"); }
+    function handleLogo(e) { }
+
+    function renderMaintenance() { 
+        const list = document.getElementById('maint-list');
+        const data = JSON.parse(localStorage.getItem('kes_maintenance_list') || '[]');
+        list.innerHTML = data.length ? "" : "<p>Aucun rappel.</p>";
+        data.sort((a,b) => new Date(a.date_prochain) - new Date(b.date_prochain)).forEach(m => {
+            const div = document.createElement('div');
+            div.className = 'maint-item';
+            div.innerHTML = `<strong>${m.client}</strong><br><small>Prochain : ${m.date_prochain}</small>`;
+            list.appendChild(div);
+        });
+    }
+
+    function addMaintenance() {
+        const client = document.getElementById('m-client').value;
+        const nDate = document.getElementById('m-date-prochain').value;
+        if(!client || !nDate) return alert("Nom et Date requis");
+        let list = JSON.parse(localStorage.getItem('kes_maintenance_list') || '[]');
+        list.push({ id: Date.now(), client, date_prochain: nDate, heure: "08:30" });
+        localStorage.setItem('kes_maintenance_list', JSON.stringify(list));
+        renderMaintenance(); renderPlanning(); alert("Rappel ajouté");
+    }
+
+    function requestNotifyPermission() { if ("Notification" in window && Notification.permission !== "granted") Notification.requestPermission(); }
+
+    function checkNotifications() {
+        if (Notification.permission !== "granted") return;
+        const now = new Date();
+        const maint = JSON.parse(localStorage.getItem('kes_maintenance_list') || '[]');
+        const plan = JSON.parse(localStorage.getItem('kes_planning_list') || '[]');
+        [...maint, ...plan].forEach(ev => {
+            const evD = new Date(ev.date || ev.date_prochain);
+            const diff = Math.ceil((evD - now) / (1000 * 60 * 60 * 24));
+            if ((diff === 2 || diff === 0) && now.getHours() === 8 && now.getMinutes() === 30) {
+                new Notification("KES Rappel", { body: (ev.titre || ev.client) });
+            }
+        });
+    }
+
+    function renderPlanning() {
+        const grid = document.getElementById('calendar-body');
+        const my = document.getElementById('calendar-month-year');
+        const months = ["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
+        my.innerText = months[currentMonth.getMonth()] + " " + currentMonth.getFullYear();
+        grid.innerHTML = "";
+        const firstDay = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1).getDay();
+        const daysInMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth()+1, 0).getDate();
+        const emptyCells = firstDay === 0 ? 6 : firstDay - 1;
+        for(let i=0; i<emptyCells; i++) grid.innerHTML += "<div></div>";
+        const maint = JSON.parse(localStorage.getItem('kes_maintenance_list') || '[]');
+        const plan = JSON.parse(localStorage.getItem('kes_planning_list') || '[]');
+        for(let d=1; d<=daysInMonth; d++) {
+            const ds = `${currentMonth.getFullYear()}-${String(currentMonth.getMonth()+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+            const hasEv = maint.some(m=>m.date_prochain===ds) || plan.some(p=>p.date===ds);
+            const cell = document.createElement('div');
+            cell.className = `calendar-day ${hasEv ? 'has-event' : ''}`;
+            cell.innerText = d;
+            cell.onclick = () => openDayDetail(ds);
+            grid.appendChild(cell);
+        }
+    }
+
+    function changeMonth(dir) { currentMonth.setMonth(currentMonth.getMonth() + dir); renderPlanning(); }
+
+    function savePlanning() {
+        const id = document.getElementById('plan-edit-id').value;
+        const titre = document.getElementById('plan-title').value;
+        const date = document.getElementById('plan-date').value;
+        const heure = document.getElementById('plan-time').value;
+        const note = document.getElementById('plan-note').value;
+        if(!titre || !date) return alert("Champs requis");
+        let list = JSON.parse(localStorage.getItem('kes_planning_list') || '[]');
+        const ev = { id: id ? Number(id) : Date.now(), type:"manuel", titre, date, heure: heure || "00:00", note };
+        if(id) { const idx = list.findIndex(p => p.id == id); list[idx] = ev; }
+        else { list.push(ev); }
+        localStorage.setItem('kes_planning_list', JSON.stringify(list));
+        document.getElementById('plan-edit-id').value = ""; document.getElementById('plan-title').value = "";
+        renderPlanning(); alert("Sauvegardé");
+    }
+
+    // VUE JOUR DETAILLEE
+    function openDayDetail(ds) {
+        selectedDate = ds;
+        document.getElementById('view-month').style.display = 'none';
+        document.getElementById('view-day-detail').style.display = 'block';
+        document.getElementById('detail-day-title').innerText = "Agenda du " + ds;
+        renderTimeline(ds);
+    }
+
+    function closeDayDetail() {
+        document.getElementById('view-month').style.display = 'block';
+        document.getElementById('view-day-detail').style.display = 'none';
+        selectedDate = null;
+    }
+
+    function renderTimeline(ds) {
+        const container = document.getElementById('timeline-body');
+        container.innerHTML = "";
+        const maint = JSON.parse(localStorage.getItem('kes_maintenance_list') || '[]').filter(m=>m.date_prochain===ds).map(m=>({...m, type:'m', titre: m.client}));
+        const plan = JSON.parse(localStorage.getItem('kes_planning_list') || '[]').filter(p=>p.date===ds);
+        const all = [...maint, ...plan].sort((a,b) => (a.heure || "00:00").localeCompare(b.heure || "00:00"));
+
+        for(let h=0; h<24; h++) {
+            const hStr = String(h).padStart(2,'0');
+            const row = document.createElement('div');
+            row.className = 'timeline-row';
+            row.innerHTML = `<div class="timeline-hour">${hStr}:00</div>`;
+            const wrapper = document.createElement('div');
+            wrapper.className = 'timeline-events-wrapper';
+            
+            all.filter(ev => (ev.heure || "00:00").startsWith(hStr)).forEach(ev => {
+                const card = document.createElement('div');
+                card.className = `timeline-card ${ev.type==='m' ? 'm' : ''}`;
+                card.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div>
+                            <strong>${ev.heure} - ${ev.titre}</strong>
+                            <div style="font-size:0.7em; opacity:0.6;">${ev.type==='m' ? 'Maintenance' : 'Intervention'}</div>
+                        </div>
+                        <div style="display:flex; gap:10px;">
+                            ${ev.type !== 'm' ? `<button onclick="editEv(${ev.id})" style="background:none; border:none; color:#0078ff; font-weight:bold; cursor:pointer;">MODIFIER</button>` : ''}
+                            <button onclick="delEv(${ev.id}, '${ev.type}')" style="background:none; border:none; color:#ff4d4d; font-weight:bold; cursor:pointer;">SUPPRIMER</button>
+                        </div>
+                    </div>`;
+                wrapper.appendChild(card);
+            });
+            row.appendChild(wrapper);
+            container.appendChild(row);
+        }
+    }
+
+    function delEv(id, type) {
+        if(!confirm("Supprimer ?")) return;
+        const key = type === 'm' ? 'kes_maintenance_list' : 'kes_planning_list';
+        let list = JSON.parse(localStorage.getItem(key) || '[]');
+        localStorage.setItem(key, JSON.stringify(list.filter(x => x.id !== id)));
+        renderTimeline(selectedDate); renderPlanning();
+    }
+
+    function editEv(id) {
+        const ev = JSON.parse(localStorage.getItem('kes_planning_list') || '[]').find(p=>p.id==id);
+        if(!ev) return;
+        closeDayDetail();
+        document.getElementById('plan-title').value = ev.titre;
+        document.getElementById('plan-date').value = ev.date;
+        document.getElementById('plan-time').value = ev.heure;
+        document.getElementById('plan-note').value = ev.note;
+        document.getElementById('plan-edit-id').value = ev.id;
+        document.getElementById('btn-save-plan').innerText = "Mettre à jour";
+    }
+
+    function renderHistory() { }
+  </script>
+</body>
+</html>
