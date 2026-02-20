@@ -111,7 +111,8 @@
             width: 100%;
         }
         
-        .login .input-box input {
+        .login .input-box input,
+        .login .input-box select {
             position: relative;
             width: 100%;
             padding: 12px 20px;
@@ -125,7 +126,17 @@
             transition: all 0.3s;
         }
         
-        .login .input-box input:focus {
+        .login .input-box select {
+            cursor: pointer;
+        }
+        
+        .login .input-box select option {
+            background: #070707;
+            color: #fff;
+        }
+        
+        .login .input-box input:focus,
+        .login .input-box select:focus {
             border-color: #0078ff;
             box-shadow: 0 0 10px rgba(0, 120, 255, 0.5);
         }
@@ -187,7 +198,7 @@
         @media (max-width: 600px) {
             .container {
                 width: 90%;
-                height: 650px;
+                height: 700px;
             }
             .login {
                 width: 85%;
@@ -240,6 +251,13 @@
                     </div>
                 </div>
                 <div class="input-box">
+                    <select id="regRole">
+                        <option value="">Sélectionner votre rôle</option>
+                        <option value="tech">Technicien (Terrain)</option>
+                        <option value="manager">Responsable (Bureau)</option>
+                    </select>
+                </div>
+                <div class="input-box">
                     <input type="password" id="regPassword" placeholder="Mot de passe" autocomplete="new-password">
                 </div>
                 <div class="input-box">
@@ -252,9 +270,6 @@
     </div>
 
     <script>
-        // ✅ CORRIGÉ: URL du Google Apps Script
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw1yuKd2k3JxuhA4xH1DjnriJUJ8MKpZHY41J68OwwxQ9tga9Nq3R74NW5xzDjpi48g/exec";
-
         function switchMode(mode) {
             const isLogin = mode === 'login';
             document.getElementById('tab-login').classList.toggle('active', isLogin);
@@ -268,6 +283,7 @@
             const el = document.getElementById('message');
             el.className = 'message show ' + type;
             el.textContent = text;
+            setTimeout(() => hideMessage(), 5000);
         }
 
         function hideMessage() {
@@ -276,197 +292,142 @@
             el.textContent = '';
         }
 
-        // ✅ CORRIGÉ: Meilleure gestion des erreurs réseau
-        async function postForm(payload) {
-            try {
-                const res = await fetch(SCRIPT_URL, {
-                    method: "POST",
-                    mode: "cors",
-                    headers: { 
-                        "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" 
-                    },
-                    body: new URLSearchParams(payload).toString()
-                });
-                
-                if (!res.ok) {
-                    throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-                }
-                
-                const txt = await res.text();
-                try { 
-                    return JSON.parse(txt); 
-                } catch (e) { 
-                    console.error("Réponse non JSON:", txt);
-                    throw new Error("Le serveur a renvoyé une réponse invalide"); 
-                }
-            } catch (error) {
-                console.error("Erreur postForm:", error);
-                throw error;
-            }
-        }
-
-        // ✅ CORRIGÉ: Meilleure gestion des erreurs réseau
-        async function getJson(url) {
-            try {
-                const res = await fetch(url, { 
-                    method: "GET",
-                    mode: "cors"
-                });
-                
-                if (!res.ok) {
-                    throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-                }
-                
-                const txt = await res.text();
-                try { 
-                    return JSON.parse(txt); 
-                } catch (e) { 
-                    console.error("Réponse non JSON:", txt);
-                    throw new Error("Le serveur a renvoyé une réponse invalide"); 
-                }
-            } catch (error) {
-                console.error("Erreur getJson:", error);
-                throw error;
-            }
-        }
-
-        // ✅ CORRIGÉ: Validation email
         function isValidEmail(email) {
             const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             return re.test(email);
         }
 
-        async function registerUser() {
+        function registerUser() {
             hideMessage();
 
-            try {
-                const name = document.getElementById('regName').value.trim();
-                const email = document.getElementById('regEmail').value.trim();
-                const phone = document.getElementById('regPhone').value.trim();
-                const password = document.getElementById('regPassword').value.trim();
+            const name = document.getElementById('regName').value.trim();
+            const email = document.getElementById('regEmail').value.trim();
+            const phone = document.getElementById('regPhone').value.trim();
+            const role = document.getElementById('regRole').value;
+            const password = document.getElementById('regPassword').value.trim();
 
-                // ✅ CORRIGÉ: Validations améliorées
-                if (!name || !email || !phone || !password) {
-                    showMessage('error', '⚠️ Veuillez remplir tous les champs');
-                    return;
-                }
-
-                if (!isValidEmail(email)) {
-                    showMessage('error', '⚠️ Email invalide');
-                    return;
-                }
-
-                if (password.length < 6) {
-                    showMessage('error', '⚠️ Le mot de passe doit contenir au moins 6 caractères');
-                    return;
-                }
-
-                // ✅ CORRIGÉ: Ajout d'un indicateur de chargement
-                showMessage('success', '⏳ Inscription en cours...');
-
-                const r = await postForm({ 
-                    action: 'register', 
-                    name, 
-                    email, 
-                    phone, 
-                    password 
-                });
-
-                if (r.success) {
-                    showMessage('success', '✅ Inscription réussie ! Connexion automatique...');
-                    
-                    // ✅ CORRIGÉ: Pré-remplir les champs de connexion
-                    document.getElementById('loginEmail').value = email;
-                    document.getElementById('loginPassword').value = password;
-                    
-                    // ✅ CORRIGÉ: Réinitialiser le formulaire d'inscription
-                    document.getElementById('regName').value = '';
-                    document.getElementById('regEmail').value = '';
-                    document.getElementById('regPhone').value = '';
-                    document.getElementById('regPassword').value = '';
-                    
-                    // ✅ CORRIGÉ: Basculer vers connexion après un délai
-                    setTimeout(() => {
-                        switchMode('login');
-                        showMessage('success', '✅ Vous pouvez maintenant vous connecter');
-                    }, 1500);
-                } else {
-                    showMessage('error', '❌ ' + (r.message || 'Erreur inscription'));
-                }
-            } catch (err) {
-                console.error("Erreur registerUser:", err);
-                showMessage('error', '❌ Impossible de se connecter au serveur. Vérifiez votre connexion internet.');
+            // Validations
+            if (!name || !email || !phone || !role || !password) {
+                showMessage('error', '⚠️ Veuillez remplir tous les champs');
+                return;
             }
+
+            if (!isValidEmail(email)) {
+                showMessage('error', '⚠️ Email invalide');
+                return;
+            }
+
+            if (password.length < 6) {
+                showMessage('error', '⚠️ Le mot de passe doit contenir au moins 6 caractères');
+                return;
+            }
+
+            // Récupérer les utilisateurs existants
+            const users = JSON.parse(localStorage.getItem('kes_users') || '[]');
+
+            // Vérifier si l'email existe déjà
+            if (users.find(u => u.email === email)) {
+                showMessage('error', '❌ Cet email est déjà utilisé');
+                return;
+            }
+
+            // Créer le nouvel utilisateur
+            const newUser = {
+                id: Date.now(),
+                name,
+                email,
+                phone,
+                role,
+                password,
+                createdAt: new Date().toISOString()
+            };
+
+            users.push(newUser);
+            localStorage.setItem('kes_users', JSON.stringify(users));
+
+            showMessage('success', '✅ Inscription réussie ! Connexion automatique...');
+
+            // Réinitialiser le formulaire
+            document.getElementById('regName').value = '';
+            document.getElementById('regEmail').value = '';
+            document.getElementById('regPhone').value = '';
+            document.getElementById('regRole').value = '';
+            document.getElementById('regPassword').value = '';
+
+            // Connexion automatique après inscription
+            setTimeout(() => {
+                sessionStorage.setItem('kes_authenticated', 'true');
+                localStorage.setItem('kes_user', JSON.stringify(newUser));
+                
+                // Rediriger selon le rôle
+                if (role === 'manager') {
+                    window.location.href = 'manager.html';
+                } else {
+                    window.location.href = 'index.html';
+                }
+            }, 1500);
         }
 
-        async function loginUser() {
+        function loginUser() {
             hideMessage();
 
-            try {
-                const email = document.getElementById('loginEmail').value.trim();
-                const password = document.getElementById('loginPassword').value.trim();
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value.trim();
 
-                // ✅ CORRIGÉ: Validation améliorée
-                if (!email || !password) {
-                    showMessage('error', '⚠️ Email et mot de passe requis');
-                    return;
-                }
-
-                if (!isValidEmail(email)) {
-                    showMessage('error', '⚠️ Email invalide');
-                    return;
-                }
-
-                // ✅ CORRIGÉ: Indicateur de chargement
-                showMessage('success', '⏳ Connexion en cours...');
-
-                const url = `${SCRIPT_URL}?action=login&id=${encodeURIComponent(email)}&pass=${encodeURIComponent(password)}`;
-                const r = await getJson(url);
-
-                if (r.success) {
-                    // ✅ CORRIGÉ: Stockage amélioré
-                    sessionStorage.setItem('kes_authenticated', 'true');
-                    
-                    const userData = {
-                        email: r.email || email,
-                        name: r.name || '',
-                        phone: r.phone || '',
-                        role: r.role || 'tech',
-                        loggedAt: new Date().toISOString()
-                    };
-                    
-                    localStorage.setItem('kes_user', JSON.stringify(userData));
-
-                    showMessage('success', '✅ Connexion réussie ! Redirection...');
-                    
-                    // ✅ CORRIGÉ: Redirection après délai
-                    setTimeout(() => {
-                        window.location.href = 'index.html';
-                    }, 1000);
-                } else {
-                    showMessage('error', '❌ ' + (r.message || 'Email ou mot de passe incorrect'));
-                }
-            } catch (err) {
-                console.error("Erreur loginUser:", err);
-                showMessage('error', '❌ Impossible de se connecter au serveur. Vérifiez votre connexion internet.');
+            if (!email || !password) {
+                showMessage('error', '⚠️ Email et mot de passe requis');
+                return;
             }
+
+            if (!isValidEmail(email)) {
+                showMessage('error', '⚠️ Email invalide');
+                return;
+            }
+
+            // Récupérer les utilisateurs
+            const users = JSON.parse(localStorage.getItem('kes_users') || '[]');
+            const user = users.find(u => u.email === email && u.password === password);
+
+            if (!user) {
+                showMessage('error', '❌ Email ou mot de passe incorrect');
+                return;
+            }
+
+            // Connexion réussie
+            showMessage('success', '✅ Connexion réussie ! Redirection...');
+            
+            sessionStorage.setItem('kes_authenticated', 'true');
+            localStorage.setItem('kes_user', JSON.stringify(user));
+
+            setTimeout(() => {
+                // Rediriger selon le rôle
+                if (user.role === 'manager') {
+                    window.location.href = 'manager.html';
+                } else {
+                    window.location.href = 'index.html';
+                }
+            }, 1000);
         }
 
-        // ✅ CORRIGÉ: Vérification de session au chargement
+        // Vérification de session au chargement
         window.addEventListener('DOMContentLoaded', () => {
             if (sessionStorage.getItem('kes_authenticated') === 'true') {
                 const userData = localStorage.getItem('kes_user');
                 if (userData) {
-                    // Si déjà connecté, rediriger
-                    window.location.href = 'index.html';
+                    const user = JSON.parse(userData);
+                    // Rediriger vers la bonne page selon le rôle
+                    if (user.role === 'manager') {
+                        window.location.href = 'manager.html';
+                    } else {
+                        window.location.href = 'index.html';
+                    }
                 } else {
-                    // Session invalide, nettoyer
                     sessionStorage.removeItem('kes_authenticated');
                 }
             }
         });
 
-        // ✅ CORRIGÉ: Permettre la soumission avec Enter
+        // Soumission avec Enter
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('loginPassword').addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') loginUser();
