@@ -3,7 +3,7 @@
  * Ce script récupère les ordres du Responsable et les injecte dans ton planning local
  */
 
-const GAS_URL_SYNC = "https://script.google.com/macros/s/AKfycbxqla1t8kTx-06zoR7q0gTDJ_89ifgS2x9PKPymypFQJfFFizML_jlapTnBMLbpJs0E/exec";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbxqla1t8kTx-06zoR7q0gTDJ_89ifgS2x9PKPymypFQJfFFizML_jlapTnBMLbpJs0E/exec";
 
 async function syncFromManager() {
     const user = JSON.parse(localStorage.getItem('kes_user') || '{}');
@@ -12,7 +12,7 @@ async function syncFromManager() {
     if (!user.id) return;
 
     try {
-        const response = await fetch(GAS_URL_SYNC, {
+        const response = await fetch(GAS_URL, {
             method: 'POST',
             body: JSON.stringify({ 
                 action: 'getTechMissions', 
