@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KES - Dashboard Responsable</title>
+    <link rel="stylesheet" href="manager.css">
+</head>
+<body>
+
+    <nav class="sidebar">
+        <h2>KES SYSTEM</h2>
+        <button class="nav-btn active" onclick="switchView('dashboard')">📊 Tableau de bord</button>
+        <button class="nav-btn" onclick="switchView('interventions')">🛠 Interventions</button>
+        <div style="margin-top: auto; padding-bottom: 20px;">
+            <p id="admin-name" style="font-size: 0.9rem; color: #aaa; margin-bottom: 10px;"></p>
+            <button class="nav-btn" onclick="logout()" style="color: #ff4444; width: 100%;">🚪 Déconnexion</button>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        
+        <header>
+            <h1>Gestion d'Exploitation</h1>
+            <button class="btn-add" onclick="openModal('modal-inter')">+ Créer une Mission</button>
+        </header>
+
+        <div id="view-dashboard" class="view active">
+            <div class="stats-grid">
+                <div class="card"><h3>À FAIRE</h3><p id="kpi-todo">0</p></div>
+                <div class="card" style="border-left-color: #ffc107;"><h3>EN COURS</h3><p id="kpi-doing">0</p></div>
+                <div class="card" style="border-left-color: #28a745;"><h3>TERMINÉES</h3><p id="kpi-done">0</p></div>
+                <div class="card" style="border-left-color: #dc3545;"><h3>URGENCES</h3><p id="kpi-urgent">0</p></div>
+            </div>
+
+            <section style="margin-top: 30px;">
+                <h3>Suivi des interventions en temps réel</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Priorité</th>
+                            <th>Statut</th>
+                            <th>Client / Adresse</th>
+                            <th>Technicien</th>
+                            <th>Dernière MAJ</th>
+                            <th>Détails</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-interventions">
+                        </tbody>
+                </table>
+            </section>
+        </div>
+
+        <div id="view-interventions" class="view">
+            <h2>Toutes les interventions</h2>
+            <p>Historique complet et archivage (en cours de développement).</p>
+        </div>
+
+    </main>
+
+    <div id="modal-inter" class="modal">
+        <div class="modal-content">
+            <h2 style="margin-top:0;">Nouvelle Intervention</h2>
+            
+            <input type="text" id="int-titre" placeholder="Objet de l'intervention (ex: Maintenance PAC)">
+            <input type="text" id="int-client" placeholder="Nom du Client">
+            <input type="text" id="int-adresse" placeholder="Adresse complète de l'intervention">
+            <textarea id="int-desc" rows="4" placeholder="Instructions détaillées pour le technicien..."></textarea>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 10px;">
+                <div>
+                    <label style="font-size: 0.8rem; color: #888;">Priorité :</label>
+                    <select id="int-prio">
+                        <option value="NORMALE">NORMALE</option>
+                        <option value="URGENTE">URGENTE</option>
+                        <option value="FAIBLE">FAIBLE</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="font-size: 0.8rem; color: #888;">Assigner à :</label>
+                    <select id="int-assign">
+                        <option value="Non assigné">Choisir plus tard</option>
+                        <option value="0660355260">Toi (Tech Principal)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div style="display:flex; gap:10px; margin-top:25px;">
+                <button class="btn-add" onclick="saveIntervention()" style="flex:2;">✅ Envoyer l'ordre</button>
+                <button onclick="closeModal('modal-inter')" style="flex:1; background:#444; color:white; border:none; border-radius:5px; cursor:pointer;">Annuler</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="api.js"></script>
+    <script src="manager.js"></script>
+</body>
+</html>
