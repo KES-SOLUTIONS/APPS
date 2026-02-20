@@ -830,5 +830,7 @@
     function editEv(id) { const ev = JSON.parse(localStorage.getItem('kes_planning_list') || '[]').find(p=>p.id==id); if(!ev) return; closeDayDetail(); document.getElementById('plan-title').value = ev.titre; document.getElementById('plan-date').value = ev.date; document.getElementById('plan-time').value = ev.heure; document.getElementById('plan-note').value = ev.note; document.getElementById('plan-edit-id').value = ev.id; document.getElementById('btn-save-plan').innerText = "Mettre à jour"; }
     function renderHistory() { }
   </script>
+  <script src="api.js"></script>
+  <script src="sync-tech.js"></script>
 </body>
 </html>
