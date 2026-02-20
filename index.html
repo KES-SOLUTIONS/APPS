@@ -3,118 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Connexion - KES Solutions</title>
+    <title>Technicien - KES Solutions</title>
     <style>
-        body { margin: 0; padding: 0; font-family: sans-serif; background: #070707; color: #fff; display: flex; justify-content: center; align-items: center; height: 100vh; }
-        .login-container { background: rgba(255, 255, 255, 0.05); padding: 40px; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.1); width: 100%; max-width: 400px; text-align: center; }
-        input, select { width: 100%; padding: 12px; margin: 10px 0; border-radius: 40px; border: 1px solid #fff; background: transparent; color: #fff; outline: none; box-sizing: border-box; }
-        option { background: #070707; color: #fff; }
-        button { width: 100%; padding: 14px; margin-top: 20px; border: none; border-radius: 40px; background: linear-gradient(45deg, #0d10d8, #cb0fd1); color: #fff; font-weight: bold; cursor: pointer; }
-        .toggle-btn { margin-top: 15px; font-size: 0.8em; color: rgba(255,255,255,0.5); cursor: pointer; text-decoration: underline; }
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #0e0e0e; color: white; padding: 20px; }
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 20px; background: #1a1a1a; border-radius: 10px; margin-bottom: 30px; }
+        .logout-btn { background: #dc3545; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; }
+        .card { background: #222; padding: 30px; border-radius: 12px; text-align: center; }
+        h1 { color: #007bff; }
     </style>
 </head>
 <body>
-    <div class="login-container">
-        <h2 id="form-title">CONNEXION</h2>
-
-        <div id="login-fields">
-            <input type="text" id="login-id" placeholder="Téléphone ou Email">
-            <input type="password" id="login-pass" placeholder="Mot de passe">
-            <button type="button" onclick="loginUser()">SE CONNECTER</button>
+    <div class="header">
+        <h1>🛠️ KES TECHNICIEN</h1>
+        <div>
+            <span id="tech-name"></span>
+            <button class="logout-btn" onclick="logout()">Déconnexion</button>
         </div>
-
-        <div id="register-fields" style="display: none;">
-            <input type="text" id="reg-name" placeholder="Nom complet">
-            <input type="text" id="reg-phone" placeholder="Téléphone">
-            <input type="email" id="reg-email" placeholder="Email">
-            <input type="password" id="reg-pass" placeholder="Mot de passe">
-            <select id="reg-role">
-                <option value="tech">Technicien (Terrain)</option>
-                <option value="manager">Responsable (Bureau)</option>
-            </select>
-            <button type="button" onclick="registerUser()">S'INSCRIRE</button>
-        </div>
-
-        <p class="toggle-btn" onclick="toggleForm()" id="toggle-text">Pas de compte ? S'inscrire</p>
     </div>
-
+    <div class="card">
+        <h2>Application Bons d'Intervention</h2>
+        <p>Bienvenue sur votre espace technicien</p>
+        <p>Remplacez ce fichier par votre application de bons d'intervention</p>
+    </div>
     <script>
-        // ✅ TON URL /EXEC (celle que tu m'as donnée)
-        const API_URL = "https://script.google.com/macros/s/AKfycbw1yuKd2k3JxuhA4xH1DjnriJUJ8MKpZHY41J68OwwxQ9tga9Nq3R74NW5xzDjpi48g/exec";
-
-        function toggleForm() {
-            const isLogin = document.getElementById('login-fields').style.display !== 'none';
-            document.getElementById('login-fields').style.display = isLogin ? 'none' : 'block';
-            document.getElementById('register-fields').style.display = isLogin ? 'block' : 'none';
-            document.getElementById('form-title').innerText = isLogin ? 'INSCRIPTION' : 'CONNEXION';
-            document.getElementById('toggle-text').innerText = isLogin ? 'Déjà un compte ? Connexion' : 'Pas de compte ? S\'inscrire';
+        const user = JSON.parse(localStorage.getItem('kes_user') || '{}');
+        if (!sessionStorage.getItem('kes_authenticated') || user.role !== 'tech') {
+            window.location.href = 'login.html';
         }
-
-        async function loginUser() {
-            try {
-                const id = (document.getElementById('login-id').value || "").trim();
-                const pass = (document.getElementById('login-pass').value || "").trim();
-                if(!id || !pass) return alert("Remplis identifiant + mot de passe");
-
-                const res = await fetch(`${API_URL}?action=login&id=${encodeURIComponent(id)}&pass=${encodeURIComponent(pass)}`);
-                const r = await res.json();
-
-                if(r.success) {
-                    sessionStorage.setItem('kes_authenticated', 'true');
-                    localStorage.setItem('kes_user', JSON.stringify({
-                        id: r.user_id,
-                        role: r.role,
-                        name: r.name,
-                        email: r.email
-                    }));
-                    window.location.href = (r.role === 'manager') ? 'manager.html' : 'index.html';
-                } else {
-                    alert("Identifiants incorrects");
-                }
-            } catch (err) {
-                console.error(err);
-                alert("Erreur login : API inaccessible ou script mal déployé.");
-            }
-        }
-
-        async function registerUser() {
-            try {
-                const name  = (document.getElementById('reg-name').value || "").trim();
-                const phone = (document.getElementById('reg-phone').value || "").trim();
-                const email = (document.getElementById('reg-email').value || "").trim();
-                const pass  = (document.getElementById('reg-pass').value || "").trim();
-                const role  = document.getElementById('reg-role').value;
-
-                if(!name || !phone || !email || !pass) return alert("Remplis tous les champs");
-
-                const payload = {
-                    action: "register",
-                    name,
-                    phone,
-                    email,
-                    pass,
-                    role
-                };
-
-                // ✅ IMPORTANT : text/plain pour éviter le préflight CORS
-                const res = await fetch(API_URL, {
-                    method: "POST",
-                    headers: { "Content-Type": "text/plain;charset=utf-8" },
-                    body: JSON.stringify(payload)
-                });
-
-                const r = await res.json();
-
-                if(r.success) {
-                    alert("Compte créé ! Tu peux te connecter.");
-                    toggleForm();
-                } else {
-                    alert("Inscription refusée : " + (r.message || "erreur"));
-                }
-            } catch (err) {
-                console.error(err);
-                alert("Erreur inscription : le script Apps Script ne répond pas au POST.");
-            }
+        document.getElementById('tech-name').innerText = user.name || 'Technicien';
+        function logout() {
+            sessionStorage.removeItem('kes_authenticated');
+            localStorage.removeItem('kes_user');
+            window.location.href = 'login.html';
         }
     </script>
 </body>
