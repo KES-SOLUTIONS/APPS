@@ -24,108 +24,47 @@
             </div>
         </header>
 
-        <!-- Vue Dashboard -->
         <div id="dashboard" class="view active">
             <div class="stats-grid">
-                <div class="card">
-                    <h3>Total Interventions</h3>
-                    <p id="stat-total">0</p>
-                </div>
-                <div class="card">
-                    <h3>En cours</h3>
-                    <p id="stat-encours">0</p>
-                </div>
-                <div class="card">
-                    <h3>Terminées</h3>
-                    <p id="stat-terminees">0</p>
-                </div>
-                <div class="card">
-                    <h3>Techniciens actifs</h3>
-                    <p id="stat-techs">0</p>
-                </div>
+                <div class="card"><h3>Total Interventions</h3><p id="stat-total">0</p></div>
+                <div class="card"><h3>En cours</h3><p id="stat-encours">0</p></div>
+                <div class="card"><h3>Terminées</h3><p id="stat-terminees">0</p></div>
+                <div class="card"><h3>Techniciens actifs</h3><p id="stat-techs">0</p></div>
             </div>
-
             <h2>Interventions récentes</h2>
             <table>
-                <thead>
-                    <tr>
-                        <th>N° Bon</th>
-                        <th>Client</th>
-                        <th>Date</th>
-                        <th>Technicien</th>
-                        <th>Statut</th>
-                    </tr>
-                </thead>
-                <tbody id="recent-table">
-                    <tr><td colspan="5" style="text-align: center; color: #888;">Aucune intervention</td></tr>
-                </tbody>
+                <thead><tr><th>N° Bon</th><th>Client</th><th>Date</th><th>Technicien</th><th>Statut</th></tr></thead>
+                <tbody id="recent-table"><tr><td colspan="5" style="text-align:center;color:#888;">Aucune intervention</td></tr></tbody>
             </table>
         </div>
 
-        <!-- Vue Interventions -->
         <div id="interventions" class="view">
             <h2>Toutes les interventions</h2>
             <table>
-                <thead>
-                    <tr>
-                        <th>N° Bon</th>
-                        <th>Client</th>
-                        <th>Adresse</th>
-                        <th>Date</th>
-                        <th>Technicien</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="all-interventions-table">
-                    <tr><td colspan="6" style="text-align: center; color: #888;">Aucune intervention</td></tr>
-                </tbody>
+                <thead><tr><th>N° Bon</th><th>Client</th><th>Adresse</th><th>Date</th><th>Technicien</th><th>Actions</th></tr></thead>
+                <tbody id="all-interventions-table"><tr><td colspan="6" style="text-align:center;color:#888;">Aucune intervention</td></tr></tbody>
             </table>
         </div>
 
-        <!-- Vue Techniciens -->
         <div id="techniciens" class="view">
             <h2>Équipe Technique</h2>
             <table>
-                <thead>
-                    <tr>
-                        <th>Nom</th>
-                        <th>Email</th>
-                        <th>Téléphone</th>
-                        <th>Interventions</th>
-                        <th>Statut</th>
-                    </tr>
-                </thead>
-                <tbody id="techs-table">
-                    <tr><td colspan="5" style="text-align: center; color: #888;">Aucun technicien</td></tr>
-                </tbody>
+                <thead><tr><th>Nom</th><th>Email</th><th>Téléphone</th><th>Interventions</th><th>Statut</th></tr></thead>
+                <tbody id="techs-table"><tr><td colspan="5" style="text-align:center;color:#888;">Aucun technicien</td></tr></tbody>
             </table>
         </div>
 
-        <!-- Vue Statistiques -->
         <div id="stats" class="view">
             <h2>Statistiques détaillées</h2>
             <div class="stats-grid">
-                <div class="card">
-                    <h3>Taux de complétion</h3>
-                    <p id="stat-completion">0%</p>
-                </div>
-                <div class="card">
-                    <h3>Moyenne / jour</h3>
-                    <p id="stat-avg">0</p>
-                </div>
-                <div class="card">
-                    <h3>Ce mois</h3>
-                    <p id="stat-month">0</p>
-                </div>
-                <div class="card">
-                    <h3>Cette semaine</h3>
-                    <p id="stat-week">0</p>
-                </div>
+                <div class="card"><h3>Taux de complétion</h3><p id="stat-completion">0%</p></div>
+                <div class="card"><h3>Moyenne / jour</h3><p id="stat-avg">0</p></div>
+                <div class="card"><h3>Ce mois</h3><p id="stat-month">0</p></div>
+                <div class="card"><h3>Cette semaine</h3><p id="stat-week">0</p></div>
             </div>
         </div>
     </div>
 
     <script src="manager.js"></script>
-    <script src="sync-tech.js"></script>
 </body>
 </html>
