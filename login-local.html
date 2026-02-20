@@ -306,7 +306,6 @@
             const role = document.getElementById('regRole').value;
             const password = document.getElementById('regPassword').value.trim();
 
-            // Validations
             if (!name || !email || !phone || !role || !password) {
                 showMessage('error', '⚠️ Veuillez remplir tous les champs');
                 return;
@@ -322,16 +321,13 @@
                 return;
             }
 
-            // Récupérer les utilisateurs existants
             const users = JSON.parse(localStorage.getItem('kes_users') || '[]');
 
-            // Vérifier si l'email existe déjà
             if (users.find(u => u.email === email)) {
                 showMessage('error', '❌ Cet email est déjà utilisé');
                 return;
             }
 
-            // Créer le nouvel utilisateur
             const newUser = {
                 id: Date.now(),
                 name,
@@ -347,19 +343,16 @@
 
             showMessage('success', '✅ Inscription réussie ! Connexion automatique...');
 
-            // Réinitialiser le formulaire
             document.getElementById('regName').value = '';
             document.getElementById('regEmail').value = '';
             document.getElementById('regPhone').value = '';
             document.getElementById('regRole').value = '';
             document.getElementById('regPassword').value = '';
 
-            // Connexion automatique après inscription
             setTimeout(() => {
                 sessionStorage.setItem('kes_authenticated', 'true');
                 localStorage.setItem('kes_user', JSON.stringify(newUser));
                 
-                // Rediriger selon le rôle
                 if (role === 'manager') {
                     window.location.href = 'manager.html';
                 } else {
@@ -384,7 +377,6 @@
                 return;
             }
 
-            // Récupérer les utilisateurs
             const users = JSON.parse(localStorage.getItem('kes_users') || '[]');
             const user = users.find(u => u.email === email && u.password === password);
 
@@ -393,14 +385,12 @@
                 return;
             }
 
-            // Connexion réussie
             showMessage('success', '✅ Connexion réussie ! Redirection...');
             
             sessionStorage.setItem('kes_authenticated', 'true');
             localStorage.setItem('kes_user', JSON.stringify(user));
 
             setTimeout(() => {
-                // Rediriger selon le rôle
                 if (user.role === 'manager') {
                     window.location.href = 'manager.html';
                 } else {
@@ -409,13 +399,11 @@
             }, 1000);
         }
 
-        // Vérification de session au chargement
         window.addEventListener('DOMContentLoaded', () => {
             if (sessionStorage.getItem('kes_authenticated') === 'true') {
                 const userData = localStorage.getItem('kes_user');
                 if (userData) {
                     const user = JSON.parse(userData);
-                    // Rediriger vers la bonne page selon le rôle
                     if (user.role === 'manager') {
                         window.location.href = 'manager.html';
                     } else {
@@ -427,7 +415,6 @@
             }
         });
 
-        // Soumission avec Enter
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('loginPassword').addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') loginUser();
