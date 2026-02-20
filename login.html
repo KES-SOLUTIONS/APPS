@@ -1,34 +1,37 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <title>Dashboard Manager - KES Solutions</title>
-    <style>
-        body { background: #070707; color: #fff; font-family: sans-serif; padding: 40px; }
-        .card { background: rgba(255,255,255,0.05); padding: 20px; border-radius: 15px; border: 1px solid #cb0fd1; }
-        h1 { color: #cb0fd1; }
-        .logout { color: #ff4d4d; cursor: pointer; text-decoration: underline; }
-    </style>
-</head>
-<body>
-    <div class="card">
-        <h1>ESPACE MANAGER</h1>
-        <p>Bienvenue dans votre tableau de bord de gestion.</p>
-        <p onclick="logout()" class="logout">Se déconnecter</p>
-    </div>
+const SPREADSHEET_ID = "TON_ID_SHEET";
 
-    <script>
-        // Sécurité : vérification du rôle manager
-        const user = JSON.parse(localStorage.getItem('kes_user'));
-        if (!user || user.role !== 'manager' || sessionStorage.getItem('kes_authenticated') !== 'true') {
-            window.location.href = 'login.html';
-        }
+function doGet(e) {
+  const action = e.parameter.action;
+  const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName("USERS");
+  const data = sheet.getDataRange().getValues();
 
-        function logout() {
-            sessionStorage.clear();
-            localStorage.removeItem('kes_user');
-            window.location.href = 'login.html';
-        }
-    </script>
-</body>
-</html>
+  if (action === "login") {
+    const id = e.parameter.id;
+    const pass = e.parameter.pass;
+    for (let i = 1; i < data.length; i++) {
+      if ((data[i][1] == id || data[i][2] == id) && data[i][3] == pass) {
+        return ContentService.createTextOutput(JSON.stringify({
+          "success": true,
+          "role": data[i][4] || "tech", 
+          "name": data[i][0]
+        })).setMimeType(ContentService.MimeType.JSON);
+      }
+    }
+    return ContentService.createTextOutput(JSON.stringify({ "success": false })).setMimeType(ContentService.MimeType.JSON);
+  }
+
+  if (action === "register") {
+    const name = e.parameter.name;
+    const phone = e.parameter.phone;
+    const email = e.parameter.email;
+    const pass = e.parameter.pass;
+    
+    // AJOUT LITTÉRAL : role="tech" par défaut
+    sheet.appendRow([name, phone, email, pass, "tech"]); 
+    
+    return ContentService.createTextOutput(JSON.stringify({ 
+      "success": true, 
+      "role": "tech" 
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
+}
