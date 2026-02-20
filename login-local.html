@@ -48,8 +48,8 @@
             <h2>KES SOLUTIONS</h2>
             <p class="subtitle">Gestion des Interventions</p>
             <div class="tabs">
-                <button class="tab active" id="tab-login" onclick="switchMode('login')">Connexion</button>
-                <button class="tab" id="tab-register" onclick="switchMode('register')">Inscription</button>
+                <button class="tab active" onclick="switchMode('login')">Connexion</button>
+                <button class="tab" onclick="switchMode('register')">Inscription</button>
             </div>
             <div class="section active" id="section-login">
                 <div class="input-box"><input type="email" id="loginEmail" placeholder="Email"></div>
@@ -76,78 +76,13 @@
         </div>
     </div>
     <script>
-        function switchMode(mode) {
-            const isLogin = mode === 'login';
-            document.getElementById('tab-login').classList.toggle('active', isLogin);
-            document.getElementById('tab-register').classList.toggle('active', !isLogin);
-            document.getElementById('section-login').classList.toggle('active', isLogin);
-            document.getElementById('section-register').classList.toggle('active', !isLogin);
-            hideMessage();
-        }
-        function showMessage(type, text) {
-            const el = document.getElementById('message');
-            el.className = 'message show ' + type;
-            el.textContent = text;
-            setTimeout(() => hideMessage(), 5000);
-        }
-        function hideMessage() {
-            const el = document.getElementById('message');
-            el.className = 'message';
-            el.textContent = '';
-        }
-        function isValidEmail(email) {
-            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-        }
-        function registerUser() {
-            hideMessage();
-            const name = document.getElementById('regName').value.trim();
-            const email = document.getElementById('regEmail').value.trim();
-            const phone = document.getElementById('regPhone').value.trim();
-            const role = document.getElementById('regRole').value;
-            const password = document.getElementById('regPassword').value.trim();
-            if (!name || !email || !phone || !role || !password) { showMessage('error', '⚠️ Veuillez remplir tous les champs'); return; }
-            if (!isValidEmail(email)) { showMessage('error', '⚠️ Email invalide'); return; }
-            if (password.length < 6) { showMessage('error', '⚠️ Le mot de passe doit contenir au moins 6 caractères'); return; }
-            const users = JSON.parse(localStorage.getItem('kes_users') || '[]');
-            if (users.find(u => u.email === email)) { showMessage('error', '❌ Cet email est déjà utilisé'); return; }
-            const newUser = { id: Date.now(), name, email, phone, role, password, createdAt: new Date().toISOString() };
-            users.push(newUser);
-            localStorage.setItem('kes_users', JSON.stringify(users));
-            showMessage('success', '✅ Inscription réussie ! Connexion automatique...');
-            document.getElementById('regName').value = '';
-            document.getElementById('regEmail').value = '';
-            document.getElementById('regPhone').value = '';
-            document.getElementById('regRole').value = '';
-            document.getElementById('regPassword').value = '';
-            setTimeout(() => {
-                sessionStorage.setItem('kes_authenticated', 'true');
-                localStorage.setItem('kes_user', JSON.stringify(newUser));
-                window.location.href = (role === 'manager') ? 'manager.html' : 'index.html';
-            }, 1500);
-        }
-        function loginUser() {
-            hideMessage();
-            const email = document.getElementById('loginEmail').value.trim();
-            const password = document.getElementById('loginPassword').value.trim();
-            if (!email || !password) { showMessage('error', '⚠️ Email et mot de passe requis'); return; }
-            if (!isValidEmail(email)) { showMessage('error', '⚠️ Email invalide'); return; }
-            const users = JSON.parse(localStorage.getItem('kes_users') || '[]');
-            const user = users.find(u => u.email === email && u.password === password);
-            if (!user) { showMessage('error', '❌ Email ou mot de passe incorrect'); return; }
-            showMessage('success', '✅ Connexion réussie ! Redirection...');
-            sessionStorage.setItem('kes_authenticated', 'true');
-            localStorage.setItem('kes_user', JSON.stringify(user));
-            setTimeout(() => { window.location.href = (user.role === 'manager') ? 'manager.html' : 'index.html'; }, 1000);
-        }
-        window.addEventListener('DOMContentLoaded', () => {
-            if (sessionStorage.getItem('kes_authenticated') === 'true') {
-                const userData = localStorage.getItem('kes_user');
-                if (userData) {
-                    const user = JSON.parse(userData);
-                    window.location.href = (user.role === 'manager') ? 'manager.html' : 'index.html';
-                }
-            }
-        });
+        function switchMode(mode){const isLogin=mode==='login';document.querySelectorAll('.tab')[0].classList.toggle('active',isLogin);document.querySelectorAll('.tab')[1].classList.toggle('active',!isLogin);document.getElementById('section-login').classList.toggle('active',isLogin);document.getElementById('section-register').classList.toggle('active',!isLogin);hideMessage();}
+        function showMessage(type,text){const el=document.getElementById('message');el.className='message show '+type;el.textContent=text;setTimeout(()=>hideMessage(),5000);}
+        function hideMessage(){const el=document.getElementById('message');el.className='message';el.textContent='';}
+        function isValidEmail(email){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);}
+        function registerUser(){hideMessage();const name=document.getElementById('regName').value.trim();const email=document.getElementById('regEmail').value.trim();const phone=document.getElementById('regPhone').value.trim();const role=document.getElementById('regRole').value;const password=document.getElementById('regPassword').value.trim();if(!name||!email||!phone||!role||!password){showMessage('error','⚠️ Veuillez remplir tous les champs');return;}if(!isValidEmail(email)){showMessage('error','⚠️ Email invalide');return;}if(password.length<6){showMessage('error','⚠️ Le mot de passe doit contenir au moins 6 caractères');return;}const users=JSON.parse(localStorage.getItem('kes_users')||'[]');if(users.find(u=>u.email===email)){showMessage('error','❌ Cet email est déjà utilisé');return;}const newUser={id:Date.now(),name,email,phone,role,password,createdAt:new Date().toISOString()};users.push(newUser);localStorage.setItem('kes_users',JSON.stringify(users));showMessage('success','✅ Inscription réussie ! Connexion automatique...');document.getElementById('regName').value='';document.getElementById('regEmail').value='';document.getElementById('regPhone').value='';document.getElementById('regRole').value='';document.getElementById('regPassword').value='';setTimeout(()=>{sessionStorage.setItem('kes_authenticated','true');localStorage.setItem('kes_user',JSON.stringify(newUser));window.location.href=(role==='manager')?'manager.html':'index.html';},1500);}
+        function loginUser(){hideMessage();const email=document.getElementById('loginEmail').value.trim();const password=document.getElementById('loginPassword').value.trim();if(!email||!password){showMessage('error','⚠️ Email et mot de passe requis');return;}if(!isValidEmail(email)){showMessage('error','⚠️ Email invalide');return;}const users=JSON.parse(localStorage.getItem('kes_users')||'[]');const user=users.find(u=>u.email===email&&u.password===password);if(!user){showMessage('error','❌ Email ou mot de passe incorrect');return;}showMessage('success','✅ Connexion réussie ! Redirection...');sessionStorage.setItem('kes_authenticated','true');localStorage.setItem('kes_user',JSON.stringify(user));setTimeout(()=>{window.location.href=(user.role==='manager')?'manager.html':'index.html';},1000);}
+        window.addEventListener('DOMContentLoaded',()=>{if(sessionStorage.getItem('kes_authenticated')==='true'){const userData=localStorage.getItem('kes_user');if(userData){const user=JSON.parse(userData);window.location.href=(user.role==='manager')?'manager.html':'index.html';}}});
     </script>
 </body>
 </html>
