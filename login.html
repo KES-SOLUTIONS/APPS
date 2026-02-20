@@ -2,86 +2,42 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Connexion - KES Solutions</title>
+    <title>Manager Dashboard - KES</title>
     <style>
-        body { margin: 0; padding: 0; font-family: sans-serif; background: #070707; color: #fff; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
-        .login-container { background: rgba(255, 255, 255, 0.05); padding: 40px; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.1); width: 100%; max-width: 400px; text-align: center; }
-        input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 40px; border: 1px solid #fff; background: transparent; color: #fff; outline: none; box-sizing: border-box; }
-        button { width: 100%; padding: 14px; margin-top: 20px; border: none; border-radius: 40px; background: linear-gradient(45deg, #0d10d8, #cb0fd1); color: #fff; font-weight: bold; cursor: pointer; }
-        .toggle-btn { margin-top: 15px; font-size: 0.8em; color: rgba(255,255,255,0.5); cursor: pointer; text-decoration: underline; }
+        body { background: #070707; color: #fff; font-family: sans-serif; padding: 20px; }
+        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #cb0fd1; padding-bottom: 10px; }
+        .card { background: #111; padding: 15px; margin: 10px 0; border-radius: 10px; border-left: 5px solid #0d10d8; }
+        .status { font-weight: bold; color: #cb0fd1; }
     </style>
 </head>
 <body>
-
-    <div class="login-container" id="login-box">
-        <h2 id="form-title">CONNEXION</h2>
-        <div id="login-fields">
-            <input type="text" id="login-id" placeholder="Numéro de téléphone ou Mail">
-            <input type="password" id="login-pass" placeholder="Mot de passe">
-            <button onclick="loginUser()">SE CONNECTER</button>
-        </div>
-        <div id="register-fields" style="display: none;">
-            <input type="text" id="reg-name" placeholder="Nom complet">
-            <input type="text" id="reg-phone" placeholder="Numéro de téléphone">
-            <input type="email" id="reg-email" placeholder="Email">
-            <input type="password" id="reg-pass" placeholder="Mot de passe">
-            <button onclick="registerUser()">S'INSCRIRE</button>
-        </div>
-        <p class="toggle-btn" id="toggle-text" onclick="toggleForm()">Pas encore de compte ? S'inscrire</p>
+    <div class="header">
+        <h1>Chef d'Équipe</h1>
+        <button onclick="location.href='login.html'">Déconnexion</button>
     </div>
+    <div id="container">Chargement des données...</div>
 
     <script>
-        const API_URL = "TON_URL_APPS_SCRIPT"; 
-
-        function toggleForm() {
-            const isLogin = document.getElementById('login-fields').style.display !== 'none';
-            document.getElementById('login-fields').style.display = isLogin ? 'none' : 'block';
-            document.getElementById('register-fields').style.display = isLogin ? 'block' : 'none';
-            document.getElementById('form-title').innerText = isLogin ? 'INSCRIPTION' : 'CONNEXION';
-            document.getElementById('toggle-text').innerText = isLogin ? 'Déjà un compte ? Se connecter' : "Pas encore de compte ? S'inscrire";
+        const API_URL = "https://script.google.com/macros/s/AKfycbzaMbeswT-HJgWQf2ih8drYrD90lChRpJOnraAukG6M-QrJclhaRRbboqCOahiQCf_5/exec";
+        
+        async function loadData() {
+            const user = JSON.parse(localStorage.getItem('kes_user'));
+            const res = await fetch(API_URL, {
+                method: 'POST',
+                body: JSON.stringify({ action: 'getAllData', auth: { user_id: user.user_id } })
+            });
+            const data = await res.json();
+            let html = "<h3>Interventions</h3>";
+            data.interventions.forEach(i => {
+                html += `<div class="card">
+                    <b>${i.titre}</b> - <span class="status">${i.statut}</span><br>
+                    <small>${i.adresse} | Client: ${i.client}</small>
+                </div>`;
+            });
+            document.getElementById('container').innerHTML = html;
         }
-
-        async function loginUser() {
-            const id = document.getElementById('login-id').value;
-            const pass = document.getElementById('login-pass').value;
-            const res = await fetch(`${API_URL}?action=login&id=${id}&pass=${pass}`);
-            const r = await res.json();
-            if(r.success) {
-                sessionStorage.setItem('kes_authenticated', 'true');
-                // AJOUT : Stockage du role reçu de l'API
-                localStorage.setItem('kes_user', JSON.stringify({ id: id, role: r.role }));
-                // AJOUT : Aiguillage par rôle
-                if (r.role === "manager") { window.location.href = 'manager.html'; }
-                else { window.location.href = 'index.html'; }
-            } else {
-                alert("Identifiants incorrects");
-            }
-        }
-
-        async function registerUser() {
-            const name = document.getElementById('reg-name').value;
-            const phone = document.getElementById('reg-phone').value;
-            const email = document.getElementById('reg-email').value;
-            const pass = document.getElementById('reg-pass').value;
-            const res = await fetch(`${API_URL}?action=register&name=${name}&phone=${phone}&email=${email}&pass=${pass}`);
-            const r = await res.json();
-            if(r.success) {
-                localStorage.setItem('kes_user', JSON.stringify({ id: phone, role: "tech" }));
-                alert("Compte créé ! Connectez-vous.");
-                toggleForm();
-            } else {
-                alert("Erreur lors de l'inscription");
-            }
-        }
-
-        window.addEventListener('DOMContentLoaded', () => {
-            const storedUser = JSON.parse(localStorage.getItem('kes_user'));
-            if (storedUser && sessionStorage.getItem('kes_authenticated') === 'true') {
-                if (storedUser.role === "manager") { window.location.href = 'manager.html'; }
-                else { window.location.href = 'index.html'; }
-            }
-        });
+        
+        window.onload = loadData;
     </script>
 </body>
 </html>
