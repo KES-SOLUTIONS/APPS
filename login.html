@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <!-- ═══ iOS / PWA OPTIMISATION ═══ -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="BACK">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#0A0A0F">
+  <meta name="format-detection" content="telephone=no">
+  <!-- Icône écran d'accueil iOS -->
+  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' fill='%230A0A0F'/%3E%3Crect x='42' y='50' width='72' height='72' rx='6' fill='%230A0A0F' stroke='%2300D4FF' stroke-width='2'/%3E%3Cpath d='M42 50 L62 32 L134 32 L114 50 Z' fill='%23111118' stroke='%2300D4FF' stroke-width='2'/%3E%3Cpath d='M114 50 L134 32 L134 104 L114 122 Z' fill='%230D0D15' stroke='%2300D4FF' stroke-width='2'/%3E%3Cellipse cx='78' cy='130' rx='45' ry='10' fill='none' stroke='%23B74AFF' stroke-width='2'/%3E%3Ctext x='90' y='170' font-family='Arial' font-weight='900' font-size='22' fill='%2300D4FF' text-anchor='middle' letter-spacing='4'%3EBACK%3C/text%3E%3C/svg%3E">
+  <link rel="manifest" href="manifest.json">
+  <!-- ═══════════════════════════════ -->
+    <title>BACK - Connexion</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Open Sans', sans-serif;
+        }
+        
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #070707;
+        }
+        
+        .container {
+            position: relative;
+            width: 500px;
+            height: 600px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .container i {
+            position: absolute;
+            inset: 0;
+            border: 1.5px solid #fff;
+            transition: .5s;
+        }
+        
+        .container i:nth-child(1) {
+            animation: animate 5s linear infinite;
+        }
+        
+        .container i:nth-child(2) {
+            animation: animate 7s linear infinite;
+        }
+        
+        .container i:nth-child(3) {
+            animation: animate 11s linear infinite;
+        }
+        
+        .container:hover i {
+            border: 6px solid var(--clr);
+            filter: drop-shadow(0 0 20px var(--clr));
+        }
+        
+        @keyframes animate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .login {
+            position: absolute;
+            width: 300px;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            gap: 15px;
+            z-index: 10;
+        }
+        
+        .login h2 {
+            font-size: 2em;
+            color: #fff;
+            margin-bottom: 10px;
+        }
+        
+        .login .subtitle {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9em;
+            margin-bottom: 10px;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            width: 100%;
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 10px;
+            background: transparent;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 40px;
+            color: rgba(255, 255, 255, 0.6);
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9em;
+        }
+        
+        .tab.active {
+            background: linear-gradient(45deg, #0d10d8, #cb0fd1);
+            border-color: transparent;
+            color: #fff;
+        }
+        
+        .section {
+            display: none;
+            width: 100%;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .section.active {
+            display: flex;
+        }
+        
+        .login .input-box {
+            position: relative;
+            width: 100%;
+        }
+        
+        .login .input-box input,
+        .login .input-box select {
+            position: relative;
+            width: 100%;
+            padding: 12px 20px;
+            background: transparent;
+            border: 2px solid #fff;
+            border-radius: 40px;
+            font-size: 1em;
+            color: #fff;
+            box-shadow: none;
+            outline: none;
+            transition: all 0.3s;
+        }
+        
+        .login .input-box select {
+            cursor: pointer;
+        }
+        
+        .login .input-box select option {
+            background: #070707;
+            color: #fff;
+        }
+        
+        .login .input-box input:focus,
+        .login .input-box select:focus {
+            border-color: #0078ff;
+            box-shadow: 0 0 10px rgba(0, 120, 255, 0.5);
+        }
+        
+        .login .input-box input[type="button"] {
+            width: 100%;
+            background: linear-gradient(45deg, #0d10d8, #cb0fd1);
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        
+        .login .input-box input[type="button"]:hover {
+            opacity: 0.9;
+        }
+        
+        .login .input-box input::placeholder {
+            color: rgba(205, 225, 225, .75);
+        }
+        
+        .message {
+            width: 100%;
+            padding: 10px 20px;
+            border-radius: 40px;
+            font-size: 0.85em;
+            text-align: center;
+            display: none;
+        }
+        
+        .message.show {
+            display: block;
+        }
+        
+        .message.success {
+            background: rgba(16, 185, 129, 0.2);
+            border: 1px solid rgba(16, 185, 129, 0.5);
+            color: #10b981;
+        }
+        
+        .message.error {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.5);
+            color: #ef4444;
+        }
+        
+        .row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                width: 90%;
+                height: 700px;
+            }
+            
+            .login {
+                width: 85%;
+            }
+            
+            .row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <i style="--clr: #0078ff;"></i>
+        <i style="--clr: #ffffff;"></i>
+        <i style="--clr: #cb0fd1;"></i>
+        
+        <div class="login">
+            <h2>BACK</h2>
+            <p class="subtitle">Gestion des Interventions</p>
+            
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('login')">Connexion</button>
+                <button class="tab" onclick="switchTab('register')">Inscription</button>
+            </div>
+            
+            <div class="section active" id="login-section">
+                <div class="input-box">
+                    <input type="email" id="emailLogin" placeholder="Email">
+                </div>
+                <div class="input-box">
+                    <input type="password" id="passLogin" placeholder="Mot de passe">
+                </div>
+                <div class="input-box">
+                    <input type="button" value="Se connecter" onclick="doLogin()">
+                </div>
+                <p style="text-align: center; margin-top: 10px;">
+                    <a href="#" onclick="forgotPassword(); return false;" style="color: #0078ff; text-decoration: none; font-size: 0.85em;">Mot de passe oublié ?</a>
+                </p>
+            </div>
+            
+            <div class="section" id="register-section">
+                <div class="input-box">
+                    <input type="text" id="nameReg" placeholder="Nom complet">
+                </div>
+                <div class="row">
+                    <div class="input-box">
+                        <input type="email" id="emailReg" placeholder="Email">
+                    </div>
+                    <div class="input-box">
+                        <input type="tel" id="phoneReg" placeholder="Téléphone">
+                    </div>
+                </div>
+                <div class="input-box">
+                    <select id="roleReg">
+                        <option value="">Sélectionner votre rôle</option>
+                        <option value="tech">Technicien (Terrain)</option>
+                        <option value="manager">Responsable (Bureau)</option>
+                    </select>
+                </div>
+                <div class="input-box">
+                    <input type="password" id="passReg" placeholder="Mot de passe (min 6 caractères)">
+                </div>
+                <div class="input-box">
+                    <input type="button" value="Créer mon compte" onclick="doRegister()">
+                </div>
+            </div>
+            
+            <div class="section" id="forgot-section">
+                <p style="color: rgba(255, 255, 255, 0.8); text-align: center; margin-bottom: 15px; font-size: 0.9em;">
+                    Entrez votre email pour réinitialiser votre mot de passe
+                </p>
+                <div class="input-box">
+                    <input type="email" id="emailForgot" placeholder="Email">
+                </div>
+                <div class="input-box">
+                    <input type="password" id="newPass" placeholder="Nouveau mot de passe">
+                </div>
+                <div class="input-box">
+                    <input type="password" id="confirmPass" placeholder="Confirmer le mot de passe">
+                </div>
+                <div class="input-box">
+                    <input type="button" value="Réinitialiser" onclick="resetPassword()">
+                </div>
+                <p style="text-align: center; margin-top: 10px;">
+                    <a href="#" onclick="switchTab('login'); return false;" style="color: #0078ff; text-decoration: none; font-size: 0.85em;">← Retour à la connexion</a>
+                </p>
+            </div>
+            
+            <div id="msg" class="message"></div>
+        </div>
+    </div>
+    
+    <script>
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach((t, i) => {
+                t.classList.toggle('active', (tab === 'login' && i === 0) || (tab === 'register' && i === 1));
+            });
+            document.getElementById('login-section').classList.toggle('active', tab === 'login');
+            document.getElementById('register-section').classList.toggle('active', tab === 'register');
+            document.getElementById('forgot-section').classList.remove('active');
+            document.getElementById('msg').className = 'message';
+        }
+        
+        function showMsg(type, text) {
+            const m = document.getElementById('msg');
+            m.className = 'message show ' + type;
+            m.textContent = text;
+        }
+        
+        function forgotPassword() {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById('forgot-section').classList.add('active');
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.getElementById('msg').className = 'message';
+        }
+        
+        function resetPassword() {
+            const email = document.getElementById('emailForgot').value.trim();
+            const newPass = document.getElementById('newPass').value.trim();
+            const confirmPass = document.getElementById('confirmPass').value.trim();
+            
+            if (!email || !newPass || !confirmPass) {
+                showMsg('error', '⚠️ Tous les champs requis');
+                return;
+            }
+            
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                showMsg('error', '⚠️ Email invalide');
+                return;
+            }
+            
+            if (newPass.length < 6) {
+                showMsg('error', '⚠️ Mot de passe trop court (min 6)');
+                return;
+            }
+            
+            if (newPass !== confirmPass) {
+                showMsg('error', '⚠️ Les mots de passe ne correspondent pas');
+                return;
+            }
+            
+            const users = JSON.parse(localStorage.getItem('kes_users') || '[]');
+            const userIndex = users.findIndex(u => u.email === email);
+            
+            if (userIndex === -1) {
+                showMsg('error', '❌ Aucun compte avec cet email');
+                return;
+            }
+            
+            users[userIndex].password = newPass;
+            localStorage.setItem('kes_users', JSON.stringify(users));
+            
+            showMsg('success', '✅ Mot de passe réinitialisé !');
+            
+            setTimeout(() => {
+                switchTab('login');
+                document.getElementById('emailLogin').value = email;
+            }, 2000);
+        }
+        
+        function doRegister() {
+            const name = document.getElementById('nameReg').value.trim();
+            const email = document.getElementById('emailReg').value.trim();
+            const phone = document.getElementById('phoneReg').value.trim();
+            const role = document.getElementById('roleReg').value;
+            const pass = document.getElementById('passReg').value.trim();
+            
+            if (!name || !email || !phone || !role || !pass) {
+                showMsg('error', '⚠️ Tous les champs requis');
+                return;
+            }
+            
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                showMsg('error', '⚠️ Email invalide');
+                return;
+            }
+            
+            if (pass.length < 6) {
+                showMsg('error', '⚠️ Mot de passe trop court (min 6)');
+                return;
+            }
+            
+            const users = JSON.parse(localStorage.getItem('kes_users') || '[]');
+            
+            if (users.find(u => u.email === email)) {
+                showMsg('error', '❌ Email déjà utilisé');
+                return;
+            }
+            
+            const user = {
+                id: Date.now(),
+                name,
+                email,
+                phone,
+                role,
+                password: pass,
+                createdAt: new Date().toISOString()
+            };
+            
+            users.push(user);
+            localStorage.setItem('kes_users', JSON.stringify(users));
+            showMsg('success', '✅ Compte créé ! Connexion...');
+            
+            setTimeout(() => {
+                sessionStorage.setItem('kes_authenticated', 'true');
+                localStorage.setItem('kes_user', JSON.stringify(user));
+                window.location.href = role === 'manager' ? 'manager.html' : 'index.html';
+            }, 1500);
+        }
+        
+        function doLogin() {
+            const email = document.getElementById('emailLogin').value.trim();
+            const pass = document.getElementById('passLogin').value.trim();
+            
+            if (!email || !pass) {
+                showMsg('error', '⚠️ Email et mot de passe requis');
+                return;
+            }
+            
+            const users = JSON.parse(localStorage.getItem('kes_users') || '[]');
+            const user = users.find(u => u.email === email && u.password === pass);
+            
+            if (!user) {
+                showMsg('error', '❌ Identifiants incorrects');
+                return;
+            }
+            
+            showMsg('success', '✅ Connexion réussie !');
+            sessionStorage.setItem('kes_authenticated', 'true');
+            localStorage.setItem('kes_user', JSON.stringify(user));
+            
+            setTimeout(() => {
+                window.location.href = user.role === 'manager' ? 'manager.html' : 'index.html';
+            }, 1000);
+        }
+        
+        // Vérifier si déjà connecté
+        if (sessionStorage.getItem('kes_authenticated') === 'true') {
+            const u = JSON.parse(localStorage.getItem('kes_user') || '{}');
+            if (u.role) {
+                window.location.href = u.role === 'manager' ? 'manager.html' : 'index.html';
+            }
+        }
+    </script>
+</body>
+</html>

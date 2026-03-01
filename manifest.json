@@ -1,0 +1,38 @@
+{
+  "name": "BACK – Field Operations",
+  "short_name": "BACK",
+  "description": "Application de gestion des bons d'intervention terrain",
+  "start_url": "./login.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0A0A0F",
+  "theme_color": "#0A0A0F",
+  "lang": "fr",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' fill='%230A0A0F'/%3E%3Crect x='45' y='50' width='76' height='76' rx='6' fill='%230A0A0F' stroke='%2300D4FF' stroke-width='2.5'/%3E%3Cpath d='M45 50 L65 32 L141 32 L121 50 Z' fill='%23111118' stroke='%2300D4FF' stroke-width='2.5'/%3E%3Cpath d='M121 50 L141 32 L141 108 L121 126 Z' fill='%230D0D15' stroke='%2300D4FF' stroke-width='2.5'/%3E%3Cellipse cx='83' cy='138' rx='48' ry='11' fill='none' stroke='%23B74AFF' stroke-width='2.5'/%3E%3Ctext x='96' y='178' font-family='Arial Black' font-weight='900' font-size='26' fill='%2300D4FF' text-anchor='middle' letter-spacing='5'%3EBACK%3C/text%3E%3C/svg%3E",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' fill='%230A0A0F'/%3E%3Crect x='110' y='130' width='200' height='200' rx='14' fill='%230A0A0F' stroke='%2300D4FF' stroke-width='5'/%3E%3Cpath d='M110 130 L165 80 L365 80 L310 130 Z' fill='%23111118' stroke='%2300D4FF' stroke-width='5'/%3E%3Cpath d='M310 130 L365 80 L365 280 L310 330 Z' fill='%230D0D15' stroke='%2300D4FF' stroke-width='5'/%3E%3Cellipse cx='210' cy='360' rx='130' ry='28' fill='none' stroke='%23B74AFF' stroke-width='5'/%3E%3Ctext x='256' y='460' font-family='Arial Black' font-weight='900' font-size='72' fill='%2300D4FF' text-anchor='middle' letter-spacing='12'%3EBACK%3C/text%3E%3C/svg%3E",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["business", "productivity"],
+  "shortcuts": [
+    {
+      "name": "Nouveau bon",
+      "url": "./index.html",
+      "description": "Créer un bon d'intervention"
+    },
+    {
+      "name": "Manager",
+      "url": "./manager.html",
+      "description": "Tableau de bord manager"
+    }
+  ]
+}
