@@ -1,0 +1,1196 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>BACK – Bons d'Intervention</title>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+    
+    :root {
+      --electric-blue: #00D4FF;
+      --vivid-purple: #B74AFF;
+      --cyber-lime: #39FF14;
+      --void-black: #0A0A0F;
+      --glass-bg: rgba(26, 26, 40, 0.6);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --glow-blue: 0 0 30px rgba(0, 212, 255, 0.6);
+      --font-display: 'Space Grotesk', sans-serif;
+      --font-body: 'Inter', sans-serif;
+    }
+    
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: var(--font-body); }
+    
+    body { 
+      background: var(--void-black) !important; 
+      color: #FFF !important; 
+      min-height: 100vh; 
+      display: flex; 
+      justify-content: center; 
+      align-items: flex-start; 
+      padding: 50px 20px !important;
+    }
+    
+    body::before {
+      content: '';
+      position: fixed;
+      top: -50%; left: -50%;
+      width: 200%; height: 200%;
+      background: radial-gradient(circle at 20% 30%, rgba(0, 212, 255, 0.08) 0%, transparent 40%),
+                  radial-gradient(circle at 80% 70%, rgba(183, 74, 255, 0.08) 0%, transparent 40%);
+      animation: atmosphericDrift 25s ease-in-out infinite alternate;
+      z-index: 0;
+      pointer-events: none;
+    }
+    
+    @keyframes atmosphericDrift {
+      0% { transform: translate(0, 0) scale(1); }
+      100% { transform: translate(-8%, -8%) scale(1.05); }
+    }
+    
+    .bg-animation { display: none !important; }
+    
+    .container { position: relative; width: 100%; max-width: 800px; z-index: 1; }
+    
+    .header { 
+      text-align: center; 
+      margin-bottom: 40px;
+      padding: 30px;
+      background: linear-gradient(135deg, rgba(26, 26, 40, 0.6), rgba(18, 18, 26, 0.8));
+      backdrop-filter: blur(25px);
+      border-radius: 24px;
+      border: 1px solid var(--glass-border);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .header::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--electric-blue), var(--vivid-purple), var(--cyber-lime));
+      animation: gradientShift 3s linear infinite;
+    }
+    
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      100% { background-position: 200% 50%; }
+    }
+    
+    .header h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 3.2rem;
+      font-weight: 900;
+      background: linear-gradient(135deg, var(--electric-blue) 0%, var(--vivid-purple) 50%, var(--cyber-lime) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 0 30px rgba(0, 212, 255, 0.9));
+      letter-spacing: 12px;
+      text-transform: uppercase;
+    }
+    
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 30px;
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px);
+      padding: 10px;
+      border-radius: 16px;
+      border: 1px solid var(--glass-border);
+      overflow-x: auto;
+    }
+    
+    .tab-btn {
+      flex: 1;
+      padding: 14px 20px;
+      border: none;
+      border-radius: 12px;
+      background: transparent;
+      color: rgba(255, 255, 255, 0.6);
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.85rem;
+      transition: all 0.3s ease;
+      white-space: nowrap;
+    }
+    
+    .tab-btn:hover {
+      background: rgba(0, 212, 255, 0.08);
+      color: #FFF;
+    }
+    
+    .tab-btn.active {
+      background: linear-gradient(135deg, rgba(0, 212, 255, 0.2), rgba(183, 74, 255, 0.2));
+      color: #FFF;
+      font-weight: 700;
+      box-shadow: var(--glow-blue);
+    }
+    
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    
+    .glass-card {
+      background: linear-gradient(135deg, rgba(26, 26, 40, 0.6), rgba(18, 18, 26, 0.8));
+      backdrop-filter: blur(25px);
+      border: 1px solid var(--glass-border);
+      border-radius: 24px;
+      padding: 30px;
+      margin-bottom: 25px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+    }
+    
+    .glass-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--electric-blue), var(--vivid-purple), var(--cyber-lime));
+      animation: gradientShift 3s linear infinite;
+    }
+    
+    .section-title {
+      font-family: var(--font-display);
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #FFF;
+      margin-bottom: 20px;
+    }
+    
+    .form-input, .form-select, .form-textarea {
+      width: 100%;
+      padding: 12px 20px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 2px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      color: #FFF;
+      font-size: 0.95rem;
+      outline: none;
+      margin-bottom: 15px;
+      transition: all 0.3s ease;
+    }
+    
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      border-color: var(--electric-blue);
+      background: rgba(0, 212, 255, 0.08);
+      box-shadow: var(--glow-blue);
+    }
+    
+    .form-select option { background: #12121A; color: #FFF; }
+    
+    .btn {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, rgba(0, 212, 255, 0.25), rgba(183, 74, 255, 0.25));
+      border: 1.5px solid rgba(0, 212, 255, 0.5);
+      color: #FFF;
+      box-shadow: var(--glow-blue);
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 40px rgba(0, 212, 255, 0.7);
+    }
+    
+    #signature-pad {
+      border: 2px dashed rgba(0, 212, 255, 0.4) !important;
+      background: #fff !important;
+      border-radius: 16px !important;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
+    }
+    
+    #signature-pad.disabled { opacity: 0.2; pointer-events: none; }
+    
+    .maint-item {
+      background: rgba(57, 255, 20, 0.08) !important;
+      border-radius: 16px !important;
+      padding: 18px !important;
+      margin-bottom: 12px !important;
+      border-left: 4px solid var(--cyber-lime) !important;
+    }
+    
+    #plaque-preview, #c-plaque-preview {
+      max-width: 100%;
+      border-radius: 16px;
+      display: none;
+      margin-bottom: 15px;
+      border: 2px solid var(--glass-border);
+    }
+    
+    .hist-item {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 20px 0;
+    }
+    
+    .hist-client-name {
+      font-weight: 700;
+      font-size: 1.15rem;
+      background: linear-gradient(135deg, var(--electric-blue), var(--vivid-purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .btn-del {
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.25), rgba(220, 38, 38, 0.25));
+      border: 1px solid rgba(239, 68, 68, 0.5);
+      color: #FFF;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+    
+    .btn-edit {
+      background: linear-gradient(135deg, rgba(0, 212, 255, 0.25), rgba(183, 74, 255, 0.25));
+      border: 1px solid rgba(0, 212, 255, 0.5);
+      color: #FFF;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      margin-right: 8px;
+    }
+    
+    body.light-mode { background: #FFF !important; color: #000 !important; }
+    body.light-mode .glass-card { background: rgba(0, 0, 0, 0.05) !important; border: 2px solid #000 !important; }
+    body.light-mode .form-input, body.light-mode .form-select, body.light-mode .form-textarea { border-color: #000 !important; color: #000 !important; }
+
+  </style>
+</head>
+
+<body>
+  <button onclick="toggleTheme()" id="theme-toggle" style="position: fixed; top: 10px; right: 60px; z-index: 9999; padding: 10px; border-radius: 50%; border: 2px solid #fff; background: rgba(0,0,0,0.5); cursor: pointer; font-size: 20px;">☀️</button>
+
+  <div class="bg-animation"><i></i><i></i><i></i></div>
+
+  <div class="container">
+    <div class="header">
+      <!-- Logo Cube de Saturne -->
+      <div style="display:flex; flex-direction:column; align-items:center; gap:12px;">
+        <svg width="72" height="72" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0 0 18px rgba(0,212,255,0.8)) drop-shadow(0 0 40px rgba(183,74,255,0.5));">
+          <!-- Cube face avant -->
+          <rect x="16" y="20" width="36" height="36" rx="4" fill="#0A0A0F" stroke="url(#cubeGrad)" stroke-width="1.5"/>
+          <!-- Cube face top -->
+          <path d="M16 20 L28 10 L64 10 L52 20 Z" fill="#111118" stroke="url(#cubeGrad)" stroke-width="1.5"/>
+          <!-- Cube face droite -->
+          <path d="M52 20 L64 10 L64 46 L52 56 Z" fill="#0D0D15" stroke="url(#cubeGrad)" stroke-width="1.5"/>
+          <!-- Anneau Saturne -->
+          <ellipse cx="36" cy="55" rx="28" ry="6" fill="none" stroke="url(#ringGrad)" stroke-width="1.8" opacity="0.9"/>
+          <!-- Point lumineux centre cube -->
+          <circle cx="34" cy="38" r="2.5" fill="url(#dotGrad)" opacity="0.9"/>
+          <!-- Lignes intérieures cube -->
+          <line x1="34" y1="20" x2="34" y2="56" stroke="rgba(0,212,255,0.15)" stroke-width="0.5"/>
+          <line x1="16" y1="38" x2="52" y2="38" stroke="rgba(0,212,255,0.15)" stroke-width="0.5"/>
+          <defs>
+            <linearGradient id="cubeGrad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#00D4FF"/>
+              <stop offset="50%" stop-color="#B74AFF"/>
+              <stop offset="100%" stop-color="#39FF14"/>
+            </linearGradient>
+            <linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="#00D4FF" stop-opacity="0.2"/>
+              <stop offset="40%" stop-color="#B74AFF"/>
+              <stop offset="60%" stop-color="#00D4FF"/>
+              <stop offset="100%" stop-color="#39FF14" stop-opacity="0.2"/>
+            </linearGradient>
+            <radialGradient id="dotGrad">
+              <stop offset="0%" stop-color="#fff"/>
+              <stop offset="100%" stop-color="#00D4FF"/>
+            </radialGradient>
+          </defs>
+        </svg>
+        <h1>BACK</h1>
+        <p style="font-family:'Orbitron',sans-serif; font-size:0.65rem; letter-spacing:8px; color:rgba(255,255,255,0.3); text-transform:uppercase;">Field Operations</p>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('profile')">PROFIL</button>
+      <button class="tab-btn" onclick="switchTab('new')">ÉDITION</button>
+      <button class="tab-btn" onclick="switchTab('clients'); renderClients();">CLIENTS</button>
+      <button class="tab-btn" onclick="switchTab('maint'); renderMaintenance();">MAINTENANCE</button>
+      <button class="tab-btn" onclick="switchTab('hist'); renderHistory();">HISTORIQUE</button>
+    </div>
+
+    <div id="content-profile" class="tab-content active">
+      <div class="glass-card">
+        <h2 class="section-title">👤 Mon Entreprise</h2>
+        <input type="text" id="p-nom" class="form-input" placeholder="Nom / Raison Sociale *">
+        <input type="text" id="p-adresse" class="form-input" placeholder="Adresse complète *">
+        <input type="text" id="p-tel" class="form-input" placeholder="Téléphone *">
+        <input type="email" id="p-email" class="form-input" placeholder="Email *">
+        <input type="text" id="p-siret" class="form-input" placeholder="SIRET / RCS">
+        <input type="file" id="p-logo-file" class="form-input" accept="image/*" onchange="handleLogo(event)">
+        <center><img id="logo-preview" style="max-width:120px; display:none; border-radius:10px; margin: 10px 0;"></center>
+        <button onclick="saveProfile()" class="btn btn-primary">Enregistrer</button>
+        <button onclick="logoutTech()" class="btn" style="background: linear-gradient(135deg, rgba(239, 68, 68, 0.25), rgba(220, 38, 38, 0.25)); border: 1.5px solid rgba(239, 68, 68, 0.5); margin-top: 15px;">🚪 Déconnexion</button>
+      </div>
+    </div>
+
+    <div id="content-new" class="tab-content">
+      <div id="lock-message" class="glass-card" style="border-color: #ff4d4d; text-align: center;">
+        <p style="color: #ff4d4d; font-weight: bold;">⚠️ Complétez votre PROFIL d'abord.</p>
+      </div>
+      <div id="editor-fields" style="display: none;">
+         <div class="glass-card">
+           <button onclick="createNewBon()" class="btn" style="background: #4CAF50; margin-bottom: 15px;">+ Nouveau bon</button>
+           <h3 class="section-title">📄 Détails du Bon</h3>
+           <input type="text" id="doc-os-number" class="form-input" placeholder="N° OS / Bon d'intervention *">
+           <select id="doc-type" class="form-select">
+             <option value="DEVIS" style="color:#000">Devis</option>
+             <option value="ENTRETIENT" style="color:#000">Entretien</option>
+             <option value="DIAGNOSTIQUE" style="color:#000">Diagnostique</option>
+             <option value="DEPANNAGE" style="color:#000">Dépannage</option>
+             <option value="URGENT" style="color:#000">Urgent</option>
+             <option value="FUITE/PLOMBERIE" style="color:#000">Fuite/Plomberie</option>
+             <option value="BON DE COMMANDE" style="color:#000">Bon de Commande</option>
+             <option value="FACTURE" style="color:#000">Facture</option>
+           </select>
+           <input type="text" id="client-name" class="form-input" placeholder="Nom du Client *">
+           <input type="text" id="client-address-doc" class="form-input" placeholder="Adresse du Client">
+           <input type="text" id="doc-site-address" class="form-input" placeholder="Adresse du site d'intervention (si différente)">
+           <input type="date" id="doc-date-passage" class="form-input">
+           <select id="doc-statut" class="form-select">
+             <option value="Terminée" style="color:#000">✅ Intervention terminée</option>
+             <option value="En cours" style="color:#000">🔄 En cours</option>
+             <option value="Suspendue" style="color:#000">⏸️ Suspendue</option>
+           </select>
+           <textarea id="doc-details" class="form-textarea" rows="4" placeholder="Travaux réalisés *"></textarea>
+           <textarea id="doc-observation" class="form-textarea" rows="3" placeholder="Observations & Recommandations (optionnel)"></textarea>
+           <div style="margin: 10px 0 15px 0;">
+             <label style="display:block; color:rgba(255,255,255,0.7); margin-bottom:8px; font-size:0.9em;">📷 Photos de l'intervention (max 6)</label>
+             <input type="file" id="doc-photos" class="form-input" accept="image/*" multiple onchange="previewDocPhotos(event)">
+             <div id="doc-photos-preview" style="display:grid; grid-template-columns: repeat(3,1fr); gap:8px; margin-top:10px;"></div>
+           </div>
+           
+           <h3 class="section-title">✍️ Signature Technicien</h3>
+           <canvas id="signature-pad" width="400" height="200"></canvas>
+           <button type="button" class="btn" onclick="clearSignature()" style="background:#ff4d4d; padding: 10px; margin-top:10px;">Effacer signature</button>
+         </div>
+         <button onclick="generatePDF()" class="btn btn-primary">Générer le PDF</button>
+      </div>
+    </div>
+
+    <div id="content-clients" class="tab-content">
+      <div class="glass-card">
+        <h2 class="section-title">👥 Nouveau Client</h2>
+        <select id="c-type" class="form-select">
+          <option value="Particulier" style="color:#000">Particulier</option>
+          <option value="Société" style="color:#000">Société</option>
+        </select>
+        <input type="text" id="c-nom" class="form-input" placeholder="Nom ou Raison Sociale *">
+        <input type="text" id="c-adresse" class="form-input" placeholder="Adresse complète">
+        <input type="text" id="c-marque" class="form-input" placeholder="Marque de la chaudière">
+        <button onclick="saveClient()" class="btn btn-primary">Enregistrer le client</button>
+      </div>
+      <div class="glass-card">
+        <h2 class="section-title">🏢 Sociétés</h2>
+        <div id="clients-list-societes"></div>
+      </div>
+      <div class="glass-card">
+        <h2 class="section-title">👤 Particuliers</h2>
+        <div id="clients-list-particuliers"></div>
+      </div>
+    </div>
+
+        <div id="content-maint" class="tab-content">
+      <!-- Formulaire Particulier -->
+      <div class="glass-card">
+        <h2 class="section-title">👤 Nouvelle Fiche - Particulier</h2>
+        
+        <div class="input-box">
+          <select id="maint-type" class="form-select" onchange="toggleMaintenanceType()">
+            <option value="particulier">Particulier</option>
+            <option value="societe">Société</option>
+          </select>
+        </div>
+
+        <!-- Formulaire PARTICULIER -->
+        <div id="form-particulier">
+          <input type="text" id="maint-part-nom" class="form-input" placeholder="Nom du client *">
+          <input type="text" id="maint-part-adresse" class="form-input" placeholder="Adresse complète *">
+          
+          <div style="margin: 15px 0;">
+            <label style="display: block; color: rgba(255, 255, 255, 0.7); margin-bottom: 8px; font-size: 0.9em;">
+              📷 Photo plaque signalétique (1 max)
+            </label>
+            <input type="file" id="maint-part-photo" accept="image/*" class="form-input" onchange="previewPartPhoto(event)">
+            <img id="maint-part-preview" style="max-width: 200px; border-radius: 10px; margin-top: 10px; display: none;">
+          </div>
+
+          <label style="color: rgba(255, 255, 255, 0.7); font-size: 0.9em;">Jour de passage</label>
+          <input type="date" id="maint-part-jour" class="form-input">
+          
+          <label style="color: rgba(255, 255, 255, 0.7); font-size: 0.9em;">Prochain passage à planifier</label>
+          <input type="date" id="maint-part-prochain" class="form-input">
+          
+          <button onclick="saveMaintenanceParticulier()" class="btn btn-primary">💾 Enregistrer Particulier</button>
+        </div>
+
+        <!-- Formulaire SOCIÉTÉ -->
+        <div id="form-societe" style="display: none;">
+          <input type="text" id="maint-soc-nom" class="form-input" placeholder="Nom de la société *">
+          <input type="text" id="maint-soc-adresse" class="form-input" placeholder="Adresse du site *">
+          <input type="text" id="maint-soc-ville" class="form-input" placeholder="Ville *">
+          
+          <div style="margin: 15px 0;">
+            <label style="display: block; color: rgba(255, 255, 255, 0.7); margin-bottom: 8px; font-size: 0.9em;">
+              📷 Photos plaques signalétiques (4 max)
+            </label>
+            <input type="file" id="maint-soc-photos" accept="image/*" multiple class="form-input" onchange="previewSocPhotos(event)">
+            <div id="maint-soc-previews" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 10px;"></div>
+          </div>
+
+          <label style="color: rgba(255, 255, 255, 0.7); font-size: 0.9em;">Jour de passage</label>
+          <input type="date" id="maint-soc-jour" class="form-input">
+          
+          <label style="color: rgba(255, 255, 255, 0.7); font-size: 0.9em;">Prochain passage à planifier</label>
+          <input type="date" id="maint-soc-prochain" class="form-input">
+          
+          <button onclick="saveMaintenanceSociete()" class="btn btn-primary">💾 Enregistrer Société</button>
+        </div>
+      </div>
+
+      <!-- Liste des Particuliers -->
+      <div class="glass-card">
+        <h2 class="section-title">👤 Particuliers</h2>
+        <div id="maint-list-particuliers"></div>
+      </div>
+
+      <!-- Liste des Sociétés -->
+      <div class="glass-card">
+        <h2 class="section-title">🏢 Sociétés</h2>
+        <div id="maint-list-societes"></div>
+      </div>
+    </div>
+
+    </div>
+
+    <div id="content-hist" class="tab-content">
+      <div class="glass-card">
+        <h2 class="section-title">🗂️ Historique des bons</h2>
+        <div id="history-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+
+    // --- SECURITE SESSION ---
+    if (sessionStorage.getItem('kes_authenticated') !== 'true') {
+        window.location.href = 'login.html';
+    }
+
+    let logoData = null;
+    let isDrawing = false;
+    let signatureEmpty = true;
+    let currentEditId = null;
+
+    window.onload = function() {
+      loadProfile();
+      validateProfile();
+      document.getElementById('doc-date-passage').valueAsDate = new Date();
+      initSignaturePad();
+    };
+
+    function logout() {
+      sessionStorage.clear();
+      window.location.href = 'login.html';
+    }
+
+    function toggleTheme() {
+      document.body.classList.toggle('light-mode');
+    }
+
+    function switchTab(t) {
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('content-'+t).classList.add('active');
+    }
+
+    // --- GESTION CLIENTS ---
+    function saveClient() {
+      const nom = document.getElementById('c-nom').value;
+      const type = document.getElementById('c-type').value;
+      const addr = document.getElementById('c-adresse').value;
+      if (!nom) return alert("Nom requis");
+      let clients = JSON.parse(localStorage.getItem('kes_clients_list') || '[]');
+      clients.push({ id: Date.now(), nom, type, adresse: addr });
+      localStorage.setItem('kes_clients_list', JSON.stringify(clients));
+      renderClients();
+    }
+
+    function renderClients() {
+      const listSoc = document.getElementById('clients-list-societes');
+      const listPart = document.getElementById('clients-list-particuliers');
+      const clients = JSON.parse(localStorage.getItem('kes_clients_list') || '[]');
+      listSoc.innerHTML = ""; listPart.innerHTML = "";
+      clients.forEach(c => {
+        const div = document.createElement('div');
+        div.className = 'maint-item';
+        div.innerHTML = `<strong>${c.nom}</strong><br><button onclick="selectClientForDoc('${c.nom}', '${c.adresse}')" style="background:#4CAF50; color:white; border:none; padding:5px; border-radius:5px; cursor:pointer; font-size:0.7em;">CHOISIR</button> <button onclick="deleteClient(${c.id})" class="btn-del">SUPPR</button>`;
+        if(c.type === 'Société') listSoc.appendChild(div); else listPart.appendChild(div);
+      });
+    }
+
+    function deleteClient(id) {
+      let clients = JSON.parse(localStorage.getItem('kes_clients_list') || '[]');
+      clients = clients.filter(c => c.id !== id);
+      localStorage.setItem('kes_clients_list', JSON.stringify(clients));
+      renderClients();
+    }
+
+    function selectClientForDoc(nom, adresse) {
+      document.getElementById('client-name').value = nom;
+      document.getElementById('client-address-doc').value = adresse;
+      switchTab('new');
+    }
+
+    // --- PHOTOS BON D'INTERVENTION ---
+    let docPhotosData = [];
+    function previewDocPhotos(event) {
+      const files = Array.from(event.target.files).slice(0, 6);
+      docPhotosData = [];
+      const container = document.getElementById('doc-photos-preview');
+      container.innerHTML = '';
+      files.forEach(file => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          docPhotosData.push(e.target.result);
+          const img = document.createElement('img');
+          img.src = e.target.result;
+          img.style.cssText = 'width:100%; border-radius:8px; border:1px solid rgba(255,255,255,0.2);';
+          container.appendChild(img);
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    // --- GESTION PDF & HISTORIQUE ---
+    async function generatePDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF('p', 'mm', 'a4');
+      const p = JSON.parse(localStorage.getItem('kes_user_profile') || '{}');
+
+      // ── DONNÉES FORMULAIRE ──
+      const osNum    = document.getElementById('doc-os-number').value || '—';
+      const type     = document.getElementById('doc-type').value;
+      const client   = document.getElementById('client-name').value || '—';
+      const addrClient = document.getElementById('client-address-doc').value || '—';
+      const addrSite = document.getElementById('doc-site-address').value || addrClient;
+      const dateVal  = document.getElementById('doc-date-passage').value;
+      const statut   = document.getElementById('doc-statut').value;
+      const details  = document.getElementById('doc-details').value || '—';
+      const obs      = document.getElementById('doc-observation').value || '';
+      const dateFmt  = dateVal ? new Date(dateVal).toLocaleDateString('fr-FR') : new Date().toLocaleDateString('fr-FR');
+
+      // ── COULEURS ──
+      const NAVY = [27, 58, 107];
+      const GOLD = [184, 150, 46];
+      const LGRAY = [242, 244, 247];
+      const MGRAY = [208, 213, 221];
+      const WHITE = [255, 255, 255];
+      const DARK  = [26, 26, 46];
+
+      const PW = 210; // page width mm
+      const ML = 15;  // margin left
+      const MR = 15;  // margin right
+      const CW = PW - ML - MR; // content width
+
+      // ── HELPERS ──
+      function setNavy()  { doc.setTextColor(...NAVY); }
+      function setGold()  { doc.setTextColor(...GOLD); }
+      function setDark()  { doc.setTextColor(...DARK); }
+      function setWhite() { doc.setTextColor(...WHITE); }
+      function setGray()  { doc.setTextColor(136,136,136); }
+
+      function hLine(y, color = NAVY, thickness = 0.5) {
+        doc.setDrawColor(...color);
+        doc.setLineWidth(thickness);
+        doc.line(ML, y, PW - MR, y);
+      }
+
+      function sectionHeader(y, text) {
+        doc.setFillColor(...LGRAY);
+        doc.rect(ML, y, CW, 8, 'F');
+        doc.setDrawColor(...GOLD);
+        doc.setLineWidth(1);
+        doc.line(ML, y, ML, y + 8);
+        doc.setDrawColor(...NAVY);
+        doc.setLineWidth(0.3);
+        doc.rect(ML, y, CW, 8, 'S');
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(9);
+        setNavy();
+        doc.text(text.toUpperCase(), ML + 5, y + 5.5);
+        return y + 8;
+      }
+
+      function infoBox(y, h, fillColor = LGRAY, borderColor = NAVY) {
+        doc.setFillColor(...fillColor);
+        doc.rect(ML, y, CW, h, 'F');
+        doc.setDrawColor(...borderColor);
+        doc.setLineWidth(1.2);
+        doc.line(ML, y, ML, y + h);
+        doc.setDrawColor(...MGRAY);
+        doc.setLineWidth(0.3);
+        doc.rect(ML, y, CW, h, 'S');
+        return y;
+      }
+
+      function labelVal(x, y, label, val, maxW = 80) {
+        doc.setFont('helvetica', 'bold'); doc.setFontSize(8.5); setNavy();
+        doc.text(label + ' :', x, y);
+        const lw = doc.getTextWidth(label + ' :') + 2;
+        doc.setFont('helvetica', 'normal'); setDark();
+        doc.text(val, x + lw, y);
+      }
+
+      function statusBadge(x, y, statut) {
+        let color, text;
+        if (statut === 'Terminée')  { color = [46,125,50];  text = '✔ Terminée'; }
+        else if (statut === 'En cours') { color = [21,101,192]; text = '↻ En cours'; }
+        else                        { color = [175,99,0];   text = '⏸ Suspendue'; }
+        doc.setFillColor(...color);
+        doc.roundedRect(x, y - 4, 36, 6, 1.5, 1.5, 'F');
+        doc.setFont('helvetica', 'bold'); doc.setFontSize(7.5);
+        setWhite();
+        doc.text(text, x + 3, y);
+      }
+
+      // ══════════════════════════════════════════
+      // PAGE 1 : EN-TÊTE + INFOS + TRAVAUX + SIGNATURE
+      // ══════════════════════════════════════════
+      let y = 15;
+
+      // ── EN-TÊTE ──────────────────────────────
+      // Logo technicien si disponible
+      if (logoData) {
+        try { doc.addImage(logoData, 'JPEG', ML, y, 28, 28); } catch(e) {}
+      }
+
+      // Infos société (à droite du logo)
+      const infoX = logoData ? ML + 32 : ML;
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(13); setNavy();
+      doc.text((p.nom || 'KOPILOTS ÉNERGIE SYSTÈMES').toUpperCase(), infoX, y + 6);
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(8); setGray();
+      doc.text(p.addr || '40, Rue Alexandre Dumas – 75011 Paris', infoX, y + 11);
+      doc.text('Tél : ' + (p.tel || '01 89 62 87 13') + '   |   ' + (p.mail || 'systeme@kopilots.fr'), infoX, y + 15.5);
+      if (p.siret) doc.text('SIRET : ' + p.siret, infoX, y + 20);
+
+      // Bloc référence (coin droit)
+      const refX = PW - MR - 55;
+      doc.setFillColor(...NAVY);
+      doc.rect(refX, y, 55, 30, 'F');
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(14); setWhite();
+      doc.text(type, refX + 27.5, y + 8, { align: 'center' });
+      doc.setFontSize(7.5);
+      doc.text('N° OS : ' + osNum, refX + 4, y + 14);
+      doc.text('Date  : ' + dateFmt, refX + 4, y + 19);
+      doc.setFont('helvetica', 'normal');
+      doc.text('Validité : 1 mois', refX + 4, y + 24);
+      doc.setDrawColor(...GOLD); doc.setLineWidth(1.5);
+      doc.line(refX, y + 28, refX + 55, y + 28);
+
+      y += 34;
+      hLine(y, GOLD, 1.5);
+      y += 5;
+
+      // ── BLOC CLIENT / INTERVENTION ────────────
+      const colW = (CW - 6) / 2;
+
+      // Client
+      doc.setFillColor(...LGRAY);
+      doc.rect(ML, y, colW, 28, 'F');
+      doc.setDrawColor(...NAVY); doc.setLineWidth(1.2);
+      doc.line(ML, y, ML, y + 28);
+      doc.setDrawColor(...NAVY); doc.setLineWidth(0.3);
+      doc.rect(ML, y, colW, 28, 'S');
+
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(7); setGold();
+      doc.text('CLIENT', ML + 4, y + 5);
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(9); setNavy();
+      doc.text(client, ML + 4, y + 10);
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(8); setDark();
+      const addrLines = doc.splitTextToSize(addrClient, colW - 8);
+      doc.text(addrLines, ML + 4, y + 16);
+
+      // Intervention
+      const col2X = ML + colW + 6;
+      doc.setFillColor(...WHITE);
+      doc.rect(col2X, y, colW, 28, 'F');
+      doc.setDrawColor(...NAVY); doc.setLineWidth(1.2);
+      doc.line(col2X + colW, y, col2X + colW, y + 28);
+      doc.setDrawColor(...NAVY); doc.setLineWidth(0.3);
+      doc.rect(col2X, y, colW, 28, 'S');
+
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(7); setGold();
+      doc.text('INTERVENTION', col2X + 4, y + 5);
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(8); setDark();
+      doc.text('Date     : ' + dateFmt, col2X + 4, y + 11);
+      const siteLines = doc.splitTextToSize('Site      : ' + addrSite, colW - 8);
+      doc.text(siteLines, col2X + 4, y + 16);
+      statusBadge(col2X + 4, y + 25, statut);
+
+      y += 32;
+
+      // ── SECTION TRAVAUX RÉALISÉS ──────────────
+      y = sectionHeader(y, '1 – Travaux réalisés');
+      y += 2;
+      const detailLines = doc.splitTextToSize(details, CW - 10);
+      const detailH = detailLines.length * 5 + 8;
+      infoBox(y, detailH, LGRAY, NAVY);
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5); setDark();
+      doc.text(detailLines, ML + 5, y + 6);
+      y += detailH + 4;
+
+      // ── SECTION OBSERVATIONS ─────────────────
+      if (obs.trim()) {
+        y = sectionHeader(y, '2 – Observations & Recommandations');
+        y += 2;
+        const obsLines = doc.splitTextToSize(obs, CW - 10);
+        const obsH = obsLines.length * 5 + 8;
+        // Boîte gold
+        doc.setFillColor(255, 248, 236);
+        doc.rect(ML, y, CW, obsH, 'F');
+        doc.setDrawColor(...GOLD); doc.setLineWidth(1.2);
+        doc.line(ML, y, ML, y + obsH);
+        doc.setDrawColor(...GOLD); doc.setLineWidth(0.3);
+        doc.rect(ML, y, CW, obsH, 'S');
+        doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5); setDark();
+        doc.text(obsLines, ML + 5, y + 6);
+        y += obsH + 4;
+      }
+
+      // ── SIGNATURE ────────────────────────────
+      y = sectionHeader(y, '3 – Validation & Signature');
+      y += 2;
+      const sigBoxH = 35;
+      infoBox(y, sigBoxH, LGRAY, NAVY);
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(7.5); setGold();
+      doc.text('SIGNATURE TECHNICIEN', ML + 5, y + 6);
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(8); setDark();
+      doc.text(p.nom || 'Kopilots Énergie Systèmes', ML + 5, y + 11);
+
+      // Signature canvas
+      const canvas = document.getElementById('signature-pad');
+      if (!signatureEmpty) {
+        try {
+          const sigImg = canvas.toDataURL('image/png');
+          doc.addImage(sigImg, 'PNG', ML + 5, y + 13, 60, 18);
+        } catch(e) {}
+      }
+
+      y += sigBoxH + 4;
+
+      // ── PIED DE PAGE ─────────────────────────
+      hLine(y, NAVY, 0.5);
+      y += 4;
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(7); setGray();
+      doc.text('KOPILOTS ÉNERGIE SYSTÈMES (KES SOLUTIONS) – SIREN : 991 577 198 – N° TVA : FR14991577198 – 40, Rue Alexandre Dumas – 75011 Paris', ML, y, { maxWidth: CW });
+      doc.setFont('times', 'italic'); doc.setFontSize(6.5); doc.setTextColor(20, 20, 20);
+      doc.text('Créé par l\'application BACK', PW / 2, y + 5, { align: 'center' });
+
+      // ══════════════════════════════════════════
+      // PAGE(S) PHOTOS
+      // ══════════════════════════════════════════
+      if (docPhotosData.length > 0) {
+        doc.addPage();
+        let py = 15;
+        hLine(py, GOLD, 1.5);
+        py += 6;
+        py = sectionHeader(py, '4 – Photos de l\'intervention');
+        py += 6;
+
+        // Grille 2 colonnes
+        const photoW = (CW - 8) / 2;
+        const photoH = photoW * 0.65;
+        let col = 0;
+
+        for (let i = 0; i < docPhotosData.length; i++) {
+          const px = ML + col * (photoW + 8);
+          if (py + photoH > 270 && i > 0) {
+            doc.addPage();
+            py = 15;
+            hLine(py, GOLD, 1.5);
+            py += 6;
+          }
+          try {
+            doc.addImage(docPhotosData[i], 'JPEG', px, py, photoW, photoH);
+            doc.setDrawColor(...MGRAY); doc.setLineWidth(0.3);
+            doc.rect(px, py, photoW, photoH, 'S');
+            doc.setFont('helvetica', 'italic'); doc.setFontSize(7); setGray();
+            doc.text('Photo ' + (i + 1), px + 2, py + photoH - 2);
+          } catch(e) {}
+          col++;
+          if (col === 2) { col = 0; py += photoH + 8; }
+        }
+
+        // Pied de page photos
+        hLine(278, NAVY, 0.5);
+        doc.setFont('helvetica', 'normal'); doc.setFontSize(7); setGray();
+        doc.text('KOPILOTS ÉNERGIE SYSTÈMES – Réf. ' + osNum + ' – ' + dateFmt, ML, 281);
+      }
+
+      // ── SAUVEGARDE HISTORIQUE & EXPORT ───────
+      let history = JSON.parse(localStorage.getItem('kes_full_history') || '[]');
+      const newEntry = {
+        id: currentEditId || Date.now(),
+        os: osNum,
+        client,
+        date: dateVal,
+        type,
+        statut,
+        details,
+        obs
+      };
+      if (currentEditId) {
+        const idx = history.findIndex(h => h.id === currentEditId);
+        if (idx !== -1) history[idx] = newEntry; else history.unshift(newEntry);
+      } else { history.unshift(newEntry); }
+      localStorage.setItem('kes_full_history', JSON.stringify(history));
+
+      doc.save('BACK-' + osNum + '-' + client.replace(/\s/g,'-') + '.pdf');
+      alert('✅ Bon d\'intervention généré !');
+      renderHistory();
+    }
+
+    function renderHistory() {
+      const list = document.getElementById('history-list');
+      const history = JSON.parse(localStorage.getItem('kes_full_history') || '[]');
+      list.innerHTML = "";
+      history.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'hist-item';
+        div.innerHTML = `<div class="hist-client-name">${item.client} (${item.date}) <div><button onclick="deleteEntry(${item.id})" class="btn-del">SUPPR</button></div></div>`;
+        list.appendChild(div);
+      });
+    }
+
+    function deleteEntry(id) {
+      let history = JSON.parse(localStorage.getItem('kes_full_history') || '[]');
+      history = history.filter(h => h.id !== id);
+      localStorage.setItem('kes_full_history', JSON.stringify(history));
+      renderHistory();
+    }
+
+    // --- PROFIL & SIGNATURE ---
+    function saveProfile() {
+      const p = { nom: document.getElementById('p-nom').value, addr: document.getElementById('p-adresse').value, mail: document.getElementById('p-email').value };
+      localStorage.setItem('kes_user_profile', JSON.stringify(p));
+      validateProfile();
+      alert("Profil sauvegardé !");
+    }
+
+    function loadProfile() {
+      const p = JSON.parse(localStorage.getItem('kes_user_profile') || '{}');
+      if(p.nom) {
+        document.getElementById('p-nom').value = p.nom;
+        document.getElementById('p-adresse').value = p.addr;
+        document.getElementById('p-email').value = p.mail;
+      }
+    }
+
+    function validateProfile() {
+      const p = JSON.parse(localStorage.getItem('kes_user_profile') || '{}');
+      const ok = p.nom && p.addr;
+      document.getElementById('lock-message').style.display = ok ? 'none' : 'block';
+      document.getElementById('editor-fields').style.display = ok ? 'block' : 'none';
+    }
+
+    function handleLogo(e) {
+      const r = new FileReader();
+      r.onload = (ev) => { logoData = ev.target.result; document.getElementById('logo-preview').src = logoData; document.getElementById('logo-preview').style.display = 'block'; };
+      r.readAsDataURL(e.target.files[0]);
+    }
+
+    function initSignaturePad() {
+      const c = document.getElementById('signature-pad');
+      const ctx = c.getContext('2d');
+      ctx.strokeStyle = '#000';
+      ctx.lineWidth = 2.5;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+
+      const getPos = (e) => {
+        const r = c.getBoundingClientRect();
+        const src = e.touches ? e.touches[0] : e;
+        return { x: src.clientX - r.left, y: src.clientY - r.top };
+      };
+
+      const start = (e) => { e.preventDefault(); isDrawing = true; signatureEmpty = false; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); };
+      const draw  = (e) => { e.preventDefault(); if (!isDrawing) return; const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); };
+      const stop  = () => { isDrawing = false; };
+
+      c.addEventListener('mousedown', start);
+      c.addEventListener('mousemove', draw);
+      c.addEventListener('mouseup', stop);
+      c.addEventListener('touchstart', start, { passive: false });
+      c.addEventListener('touchmove', draw,  { passive: false });
+      c.addEventListener('touchend', stop);
+      window.addEventListener('mouseup', stop);
+    }
+
+    function clearSignature() {
+      const c = document.getElementById('signature-pad');
+      c.getContext('2d').clearRect(0, 0, c.width, c.height);
+      signatureEmpty = true;
+    }
+
+    function toggleNoSignature() {}
+
+    function createNewBon() {
+      currentEditId = null;
+      document.getElementById('client-name').value = "";
+      document.getElementById('doc-os-number').value = "";
+      document.getElementById('doc-site-address').value = "";
+      document.getElementById('doc-statut').value = "Terminée";
+      document.getElementById('doc-details').value = "";
+      document.getElementById('doc-observation').value = "";
+      document.getElementById('doc-photos-preview').innerHTML = "";
+      docPhotosData = [];
+      clearSignature();
+    }
+    
+    function saveMaintenance() {
+      const c = document.getElementById('m-client').value;
+      const n = document.getElementById('m-date-next').value;
+      if(!c || !n) return;
+      let m = JSON.parse(localStorage.getItem('kes_maintenances') || '[]');
+      m.push({ client: c, dateNext: n, id: Date.now() });
+      localStorage.setItem('kes_maintenances', JSON.stringify(m));
+      renderMaintenance();
+    }
+
+    function renderMaintenance() {
+      const l = document.getElementById('maint-list');
+      const m = JSON.parse(localStorage.getItem('kes_maintenances') || '[]');
+      l.innerHTML = "";
+      m.forEach(x => { const div = document.createElement('div'); div.className = 'maint-item'; div.innerHTML = `<strong>${x.client}</strong> - ${x.dateNext}`; l.appendChild(div); });
+    }
+  
+
+
+// ============ GESTION MAINTENANCE ============
+
+let currentPartPhoto = null;
+let currentSocPhotos = [];
+
+function toggleMaintenanceType() {
+  const type = document.getElementById('maint-type').value;
+  document.getElementById('form-particulier').style.display = type === 'particulier' ? 'block' : 'none';
+  document.getElementById('form-societe').style.display = type === 'societe' ? 'block' : 'none';
+}
+
+function previewPartPhoto(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    currentPartPhoto = e.target.result;
+    const preview = document.getElementById('maint-part-preview');
+    preview.src = currentPartPhoto;
+    preview.style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+}
+
+function previewSocPhotos(event) {
+  const files = Array.from(event.target.files).slice(0, 4); // Max 4 photos
+  currentSocPhotos = [];
+  const container = document.getElementById('maint-soc-previews');
+  container.innerHTML = '';
+  
+  files.forEach((file, index) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      currentSocPhotos.push(e.target.result);
+      const img = document.createElement('img');
+      img.src = e.target.result;
+      img.style.width = '100%';
+      img.style.borderRadius = '10px';
+      img.style.border = '2px solid rgba(255, 255, 255, 0.2)';
+      container.appendChild(img);
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function saveMaintenanceParticulier() {
+  const nom = document.getElementById('maint-part-nom').value.trim();
+  const adresse = document.getElementById('maint-part-adresse').value.trim();
+  const jour = document.getElementById('maint-part-jour').value;
+  const prochain = document.getElementById('maint-part-prochain').value;
+  
+  if (!nom || !adresse || !jour || !prochain) {
+    alert('⚠️ Veuillez remplir tous les champs obligatoires');
+    return;
+  }
+  
+  const particuliers = JSON.parse(localStorage.getItem('kes_maint_particuliers') || '[]');
+  
+  const fiche = {
+    id: Date.now(),
+    type: 'particulier',
+    nom,
+    adresse,
+    photo: currentPartPhoto,
+    jourPassage: jour,
+    prochainPassage: prochain,
+    createdAt: new Date().toISOString()
+  };
+  
+  particuliers.push(fiche);
+  localStorage.setItem('kes_maint_particuliers', JSON.stringify(particuliers));
+  
+  // Réinitialiser le formulaire
+  document.getElementById('maint-part-nom').value = '';
+  document.getElementById('maint-part-adresse').value = '';
+  document.getElementById('maint-part-jour').value = '';
+  document.getElementById('maint-part-prochain').value = '';
+  document.getElementById('maint-part-photo').value = '';
+  document.getElementById('maint-part-preview').style.display = 'none';
+  currentPartPhoto = null;
+  
+  alert('✅ Fiche particulier enregistrée !');
+  renderMaintenanceParticuliers();
+}
+
+function saveMaintenanceSociete() {
+  const nom = document.getElementById('maint-soc-nom').value.trim();
+  const adresse = document.getElementById('maint-soc-adresse').value.trim();
+  const ville = document.getElementById('maint-soc-ville').value.trim();
+  const jour = document.getElementById('maint-soc-jour').value;
+  const prochain = document.getElementById('maint-soc-prochain').value;
+  
+  if (!nom || !adresse || !ville || !jour || !prochain) {
+    alert('⚠️ Veuillez remplir tous les champs obligatoires');
+    return;
+  }
+  
+  const societes = JSON.parse(localStorage.getItem('kes_maint_societes') || '[]');
+  
+  const fiche = {
+    id: Date.now(),
+    type: 'societe',
+    nom,
+    adresse,
+    ville,
+    photos: currentSocPhotos,
+    jourPassage: jour,
+    prochainPassage: prochain,
+    createdAt: new Date().toISOString()
+  };
+  
+  societes.push(fiche);
+  localStorage.setItem('kes_maint_societes', JSON.stringify(societes));
+  
+  // Réinitialiser le formulaire
+  document.getElementById('maint-soc-nom').value = '';
+  document.getElementById('maint-soc-adresse').value = '';
+  document.getElementById('maint-soc-ville').value = '';
+  document.getElementById('maint-soc-jour').value = '';
+  document.getElementById('maint-soc-prochain').value = '';
+  document.getElementById('maint-soc-photos').value = '';
+  document.getElementById('maint-soc-previews').innerHTML = '';
+  currentSocPhotos = [];
+  
+  alert('✅ Fiche société enregistrée !');
+  renderMaintenanceSocietes();
+}
+
+function renderMaintenanceParticuliers() {
+  const container = document.getElementById('maint-list-particuliers');
+  const particuliers = JSON.parse(localStorage.getItem('kes_maint_particuliers') || '[]');
+  
+  if (particuliers.length === 0) {
+    container.innerHTML = '<p style="color: #888; text-align: center; padding: 20px;">Aucune fiche particulier</p>';
+    return;
+  }
+  
+  container.innerHTML = particuliers.map(p => `
+    <div class="maint-item" style="margin-bottom: 15px; padding: 15px; background: rgba(255, 255, 255, 0.05); border-radius: 12px; border-left: 4px solid #00D4FF;">
+      <h3 style="color: #00D4FF; margin-bottom: 10px;">👤 ${p.nom}</h3>
+      <p style="color: rgba(255, 255, 255, 0.7); margin: 5px 0;">📍 ${p.adresse}</p>
+      ${p.photo ? `<img src="${p.photo}" style="max-width: 150px; border-radius: 8px; margin: 10px 0;">` : ''}
+      <p style="color: rgba(255, 255, 255, 0.7); margin: 5px 0;">📅 Dernier passage : ${new Date(p.jourPassage).toLocaleDateString('fr-FR')}</p>
+      <p style="color: #39FF14; margin: 5px 0; font-weight: bold;">🔔 Prochain passage : ${new Date(p.prochainPassage).toLocaleDateString('fr-FR')}</p>
+      <button onclick="deleteMaintenanceParticulier(${p.id})" class="btn-del" style="margin-top: 10px;">🗑️ Supprimer</button>
+    </div>
+  `).join('');
+}
+
+function renderMaintenanceSocietes() {
+  const container = document.getElementById('maint-list-societes');
+  const societes = JSON.parse(localStorage.getItem('kes_maint_societes') || '[]');
+  
+  if (societes.length === 0) {
+    container.innerHTML = '<p style="color: #888; text-align: center; padding: 20px;">Aucune fiche société</p>';
+    return;
+  }
+  
+  container.innerHTML = societes.map(s => `
+    <div class="maint-item" style="margin-bottom: 15px; padding: 15px; background: rgba(255, 255, 255, 0.05); border-radius: 12px; border-left: 4px solid #B74AFF;">
+      <h3 style="color: #B74AFF; margin-bottom: 10px;">🏢 ${s.nom}</h3>
+      <p style="color: rgba(255, 255, 255, 0.7); margin: 5px 0;">📍 ${s.adresse}</p>
+      <p style="color: rgba(255, 255, 255, 0.7); margin: 5px 0;">🏙️ ${s.ville}</p>
+      ${s.photos && s.photos.length > 0 ? `
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin: 10px 0;">
+          ${s.photos.map(photo => `<img src="${photo}" style="width: 100%; border-radius: 8px;">`).join('')}
+        </div>
+      ` : ''}
+      <p style="color: rgba(255, 255, 255, 0.7); margin: 5px 0;">📅 Dernier passage : ${new Date(s.jourPassage).toLocaleDateString('fr-FR')}</p>
+      <p style="color: #39FF14; margin: 5px 0; font-weight: bold;">🔔 Prochain passage : ${new Date(s.prochainPassage).toLocaleDateString('fr-FR')}</p>
+      <button onclick="deleteMaintenanceSociete(${s.id})" class="btn-del" style="margin-top: 10px;">🗑️ Supprimer</button>
+    </div>
+  `).join('');
+}
+
+function deleteMaintenanceParticulier(id) {
+  if (!confirm('Supprimer cette fiche particulier ?')) return;
+  
+  let particuliers = JSON.parse(localStorage.getItem('kes_maint_particuliers') || '[]');
+  particuliers = particuliers.filter(p => p.id !== id);
+  localStorage.setItem('kes_maint_particuliers', JSON.stringify(particuliers));
+  renderMaintenanceParticuliers();
+}
+
+function deleteMaintenanceSociete(id) {
+  if (!confirm('Supprimer cette fiche société ?')) return;
+  
+  let societes = JSON.parse(localStorage.getItem('kes_maint_societes') || '[]');
+  societes = societes.filter(s => s.id !== id);
+  localStorage.setItem('kes_maint_societes', JSON.stringify(societes));
+  renderMaintenanceSocietes();
+}
+
+// Fonction modifiée pour l'onglet maintenance
+function renderMaintenance() {
+  renderMaintenanceParticuliers();
+  renderMaintenanceSocietes();
+}
+
+</script>
+</body>
+</html>
+  
